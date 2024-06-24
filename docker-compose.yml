@@ -1,9 +1,25 @@
 version: "3.9"
 services:
-  web:
+  server:
     command: "poetry run uvicorn main:app --host 0.0.0.0 --port ${SERVER_PORT} --reload"
     build: server
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     volumes:
       - ./server:/code
+    env_file:
+      - .env
+
+  db:
+    image: postgres
+    volumes:
+      - data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ways
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "50432:5432"
+
+volumes:
+  data:
