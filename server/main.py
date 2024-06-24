@@ -1,8 +1,9 @@
 from fastapi import FastAPI
+from fastapi.responses import Response
 
 app = FastAPI()
 
 
 @app.get("/")
-async def root():
-    return "Hello kekw"
+def app():
+    return Response("Hello World")
