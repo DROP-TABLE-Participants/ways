@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  web:
+    command: "poetry run uvicorn app:app --host 0.0.0.0 --port ${SERVER_PORT} --reload"
+    build: server
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    volumes:
+      - type: bind
+        source: .
+        target: /code/
