@@ -4,8 +4,8 @@ from api.routers.product import product_router
 from api.routers.session import session_router
 from api.routers.tile import tile_router
 
-router = APIRouter(prefix="/api")
+apiRouter = APIRouter(prefix="/api")
 
-router.include_router(product_router)
-router.include_router(tile_router)
-router.include_router(session_router)
+apiRouter.include_router(product_router)
+apiRouter.include_router(tile_router)
+apiRouter.include_router(session_router)
