@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import '../styles/component-styles/search-bar.scss';
 
 interface SearchBarProps {
     onSearch: (query: string) => void;
@@ -16,9 +17,14 @@ function SearchBar( onSearch: SearchBarProps ) {
     };
 
     return (
-        <div>
-            <input type="text" value={query} onChange={handleInputChange} />
-            <button onClick={handleSearch}>Search</button>
+        <div className="search-container">
+        <input
+            type="text"
+            value={query}
+            onChange={handleInputChange}
+            className="search-input"
+            placeholder="Яйца, мляко, хляб..."
+        />
         </div>
     );
 };

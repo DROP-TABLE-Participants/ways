@@ -1,0 +1,27 @@
+.react-modal-sheet-backdrop {
+    background-color: rgba(24, 19, 43, 0.21);
+    backdrop-filter: blur(10px);
+}
+
+.cart-items-list {
+    width: 100%;
+    background-color: #fff;
+    border-radius: 20px;
+    box-sizing: border-box;
+    padding: 1.5rem;
+    gap: 1.5rem;
+    
+    .cart-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        width: 100%;
+
+        .cart-item-image {
+            width: 8rem;
+            height: 8rem;
+            overflow: hidden;
+            object-fit: cover;
+        }
+    }
+}
