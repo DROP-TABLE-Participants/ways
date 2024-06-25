@@ -7,6 +7,7 @@ from services.product_service import ProductService
 
 product_endpoints = APIRouter()
 
+
 @product_endpoints.get("/", response_model=List[Product_Pydantic])
 async def get_products():
     items = await ProductService.get_products()

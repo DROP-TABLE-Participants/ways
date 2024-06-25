@@ -1,19 +1,19 @@
 import os
 from contextlib import asynccontextmanager
-from uuid import UUID, uuid4
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 
-from starlette.responses import JSONResponse
 from tortoise.contrib.fastapi import RegisterTortoise
 
-from api.routers.api import router
+from api.routers.api import apiRouter
 from seed import Seeder
+from ws.routes.ws import wsRouter
 
 
 def create_application(lifespan) -> FastAPI:
     application = FastAPI(lifespan=lifespan)
-    application.include_router(router)
+    application.include_router(apiRouter)
+    application.include_router(wsRouter)
     return application
 
 
@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
                    f"{os.getenv('DB_HOST')}:"
                    f"{os.getenv('DB_PORT')}/"
                    f"{os.getenv('DB_NAME')}",
-            modules={"models": ["models.product", "models.tile", "aerich.models"]},
+            modules={"models": ["models.product", "models.tile", "models.session", "aerich.models"]},
             generate_schemas=True,
             add_exception_handlers=True,
     ):
