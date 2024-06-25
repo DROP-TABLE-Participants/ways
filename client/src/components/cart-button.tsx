@@ -1,6 +1,6 @@
 import React from 'react';
 
-const CartButton: React.FC = () => {
+function CartButton() {
     return (
         <div className="cart-button">
             <button className="cart-button__icon">

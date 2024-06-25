@@ -4,7 +4,7 @@ interface SearchBarProps {
     onSearch: (query: string) => void;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
+function SearchBar( onSearch: SearchBarProps ) {
     const [query, setQuery] = useState('');
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -12,7 +12,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
     };
 
     const handleSearch = () => {
-        onSearch(query);
+        onSearch.onSearch(query);
     };
 
     return (

@@ -1,19 +1,15 @@
-import React from 'react';
-
-interface ProductCardProps {
+interface ProductCategoryCardProps {
     name: string;
-    price: number;
     imageUrl: string;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ name, price, imageUrl }) => {
+function ProductCategoryCard (props: ProductCategoryCardProps) {
     return (
         <div className="product-card">
-            <img src={imageUrl} alt={name} className="product-card__image" />
-            <h3 className="product-card__name">{name}</h3>
-            <p className="product-card__price">${price}</p>
+            <img src={props.imageUrl} alt={props.name} className="product-card__image" />
+            <h3 className="product-card__name">{props.name}</h3>
         </div>
     );
 };
 
-export default ProductCard;
+export default ProductCategoryCard;
