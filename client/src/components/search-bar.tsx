@@ -16,6 +16,12 @@ function SearchBar( onSearch: SearchBarProps ) {
         onSearch.onSearch(query);
     };
 
+    const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            handleSearch();
+        }
+    };
+
     return (
         <div className="search-container">
         <input
@@ -24,6 +30,7 @@ function SearchBar( onSearch: SearchBarProps ) {
             onChange={handleInputChange}
             className="search-input"
             placeholder="Яйца, мляко, хляб..."
+            onKeyDown={handleKeyPress}
         />
         </div>
     );

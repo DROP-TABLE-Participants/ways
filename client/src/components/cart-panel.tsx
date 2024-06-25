@@ -1,14 +1,13 @@
-import { useRef } from 'react';
-import { useButton } from 'react-aria';
+import { useNavigate } from 'react-router-dom';
 import { useOverlayTriggerState } from 'react-stately';
-
 import CartIcon from './icons/cart-icon';
 import ProductCartCard from './cart-product-card';
 import './../styles/component-styles/cart-panel.scss';
-import { A11ySheet } from './a11-sheet';  // Ensure this path is correct based on your project structure
+import { A11ySheet } from './a11-sheet';
 
 function CartPanel() {
   const sheetState = useOverlayTriggerState({});
+  const navigate = useNavigate();
 
   return (
     <>
@@ -48,7 +47,7 @@ function CartPanel() {
             </div>
             <div className="cart-call-to-action" onClick={() => {
               sheetState.close();
-              // Redirect to checkout page
+              navigate('/navigation');
             }}>
               <p>Започни Пазаруване</p>
             </div>
