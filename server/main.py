@@ -1,7 +1,10 @@
 import os
 from contextlib import asynccontextmanager
+from uuid import UUID, uuid4
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+
+from starlette.responses import JSONResponse
 from tortoise.contrib.fastapi import RegisterTortoise
 
 from api.routers.api import router
