@@ -11,3 +11,6 @@ class ProductService:
         product_obj = await Product.create(**product.model_dump(exclude_unset=True))
         return await Product_Pydantic.from_tortoise_orm(product_obj)
 
+    @staticmethod
+    async def get_product_by_name_and_category(name: str, category: str):
+        return await Product_Pydantic.from_queryset_single(Product.get(name=name, category=category))

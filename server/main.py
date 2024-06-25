@@ -1,37 +1,35 @@
-import asyncio
-from typing import List
+import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from fastapi.responses import Response
+from tortoise.contrib.fastapi import RegisterTortoise
 
-from data.data import init_db
-from models.product import Product_Pydantic, ProductIn_Pydantic, Product
+from api.routers.api import router
 from seed import Seeder
-from services.product_service import ProductService
 
 
-def create_application() -> FastAPI:
-    application = FastAPI()
+def create_application(lifespan) -> FastAPI:
+    application = FastAPI(lifespan=lifespan)
+    application.include_router(router)
     return application
 
 
-app = create_application()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with RegisterTortoise(
+            app,
+            db_url=f"postgres://{os.getenv('DB_USER')}:"
+                   f"{os.getenv('DB_PASSWORD')}@"
+                   f"{os.getenv('DB_HOST')}:"
+                   f"{os.getenv('DB_PORT')}/"
+                   f"{os.getenv('DB_NAME')}",
+            modules={"models": ["models.product", "models.tile", "aerich.models"]},
+            generate_schemas=True,
+            add_exception_handlers=True,
+    ):
+        print("Starting up...")
+        await Seeder.seed()
+        yield
 
 
-@app.on_event("startup")
-async def startup_event():
-    print("Starting up...")
-    init_db(app)
-
-
-@app.get("/")
-async def main():
-    await Seeder.seed()
-    items = await ProductService.get_products()
-    return items
-
-
-@app.post("/products")
-async def create_product(product: ProductIn_Pydantic):
-    product_obj = await Product.create(**product.model_dump(exclude_unset=True))
-    return await Product_Pydantic.from_tortoise_orm(product_obj)
+app = create_application(lifespan=lifespan)
