@@ -16,7 +16,7 @@ function Catalog() {
 
         return (
             <div className="container">
-                <h1 className="catalog-heading">Fill cart:</h1>
+                <h1 className="catalog-heading">Добави продукти:</h1>
                 <div className='content'>
                     <SearchBar onSearch={(query) => console.log(query)} />
                     <div className="product-list">

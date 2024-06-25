@@ -1,18 +1,19 @@
-.product-card {
+.product-category-card {
     position: relative;
     display: inline-block;
     border-radius: 10px;
     width: 150px;
     height: 150px;
     overflow: hidden;
+    cursor: pointer;
   
-    .product-card-image {
+    .product-category-card-image {
       object-fit: cover;
       border-radius: 10px;
       height: 100%;
     }
   
-    .product-card-name {
+    .product-category-card-name {
       position: absolute;
       bottom: 10px;
       margin: 0;
