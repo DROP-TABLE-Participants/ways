@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Sheet, type SheetRef } from 'react-modal-sheet';
 import StoreNavigationCard from '../components/store-navigation-card';
 import '../styles/page-styles/store-navigation.scss';
+import Map from '../components/map';
 
 function StoreNavigation() {
   const tempImageUrl = "https://www.healthyeating.org/images/default-source/home-0.0/nutrition-topics-2.0/general-nutrition-wellness/2-2-2-3foodgroups_fruits_detailfeature.jpg?sfvrsn=64942d53_4";
@@ -20,8 +21,23 @@ function StoreNavigation() {
   const ref = useRef<SheetRef>(null);
   const snapTo = (i: number) => ref.current?.snapTo(i);
 
+  const [tiles, setTiles] = useState([]);
+  useEffect(() => {
+    fetch(`https://ways-api.azurewebsites.net/api/tile/`)
+        .then(response => response.json())
+        .then((data) => setTiles(data));
+}, []);
+
+  let selected_products = [{x:'27', y:'4', name: 'Borisi'}, {x:'33', y:'3', name: 'Atanasi'}, {x:'35', y:'20', name: 'Kalini'}]
+
   return (
-    <div className="container">
+    <div className="content-container">
+      
+      <div className="map-container">
+        <Map tiles={tiles} selectedProducts={selected_products}/>
+      </div>
+
+
       <Sheet
         ref={ref}
         isOpen={isOpen}
