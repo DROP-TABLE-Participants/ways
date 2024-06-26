@@ -3,14 +3,14 @@ import * as THREE from 'three';
 import { Canvas, useFrame, useThree, extend } from '@react-three/fiber';
 // import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
 import TWEEN from '@tweenjs/tween.js';
-import tiles from './../assets/placement.json'
+// import tiles from './../assets/placement.json'
 import { shaderMaterial } from '@react-three/drei';
 
 // extend({ CSS2DRenderer, CSS2DObject });
 
 const selectedProducts = [{ x: 27, y: 4, name: 'Borisi' }, { x: 33, y: 3, name: 'Atanasi' }, { x: 35, y: 20, name: 'Kalini' }];
 
-const calcDimensions = () => {
+const calcDimensions = (tiles: Array<object>) => {
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   let blockedMinX = Infinity, blockedMinY = Infinity, blockedMaxX = -Infinity, blockedMaxY = -Infinity;
 
@@ -20,7 +20,7 @@ const calcDimensions = () => {
     if (tile.x > maxX) maxX = tile.x;
     if (tile.y > maxY) maxY = tile.y;
 
-    if (tile.product_id === 'BL') {
+    if (tile.type === 4) {
       if (tile.x < blockedMinX) blockedMinX = tile.x;
       if (tile.y < blockedMinY) blockedMinY = tile.y;
       if (tile.x > blockedMaxX) blockedMaxX = tile.x;
@@ -127,8 +127,8 @@ const BlockedArea = ({ blockedCenterX, blockedCenterY, blockedWidth, blockedHeig
   </mesh>)
 };
 
-function Map ({selectedProducts} : {selectedProducts: Array<object>}, {path} : {path: Array<object>}) {
-  const { centerX, centerY, mapWidth, mapHeight, blockedWidth, blockedHeight, blockedCenterX, blockedCenterY } = calcDimensions();
+function Map ({tiles, selectedProducts}: {tiles: Array<object>, selectedProducts: Array<object>}) {
+  const { centerX, centerY, mapWidth, mapHeight, blockedWidth, blockedHeight, blockedCenterX, blockedCenterY } = calcDimensions(tiles);
   const initialDistance = Math.max(mapWidth, mapHeight) / 2 / Math.tan(THREE.MathUtils.degToRad(20));
   
   const personRef = useRef();
@@ -143,7 +143,7 @@ function Map ({selectedProducts} : {selectedProducts: Array<object>}, {path} : {
 
   const [cameraMode, setCameraMode] = useState(CAMERA_MODES.TILTED);
 
-  const ProductTile = ({ type, x, y }) => {
+  const ProductTile = ({ id, x, y, type }) => {
     const ref = useRef();
     const material = useRef();
   
@@ -172,7 +172,7 @@ function Map ({selectedProducts} : {selectedProducts: Array<object>}, {path} : {
       }
     });
   
-    const geometry = type.startsWith('P') ? new THREE.BoxGeometry(0.2, 0.5, 0.2) : new THREE.BoxGeometry(0.2, 0.2, 0.2);
+    const geometry = type === 0 || type === 5 ? new THREE.BoxGeometry(0.2, 0.5, 0.2) : new THREE.BoxGeometry(0.2, 0.2, 0.2);
   
     return (
       <mesh ref={ref} position={[x * 0.2, geometry.parameters.height / 2, y * 0.2]} material={material.current} castShadow receiveShadow>
@@ -500,7 +500,7 @@ const handleTouchEnd = () => {
 
         {tiles.map((tile) => {
           if (tile.product_id !== 'BL') {
-            return <ProductTile key={`${tile.x}-${tile.y}`} type={tile.product_id} x={tile.x} y={tile.y} />;
+            return <ProductTile key={`${tile.x}-${tile.y}`} type={tile.type} x={tile.x} y={tile.y} />;
           }
           return null;
         })}

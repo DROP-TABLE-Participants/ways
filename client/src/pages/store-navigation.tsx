@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Sheet, type SheetRef } from 'react-modal-sheet';
 import StoreNavigationCard from '../components/store-navigation-card';
 import '../styles/page-styles/store-navigation.scss';
@@ -21,13 +21,20 @@ function StoreNavigation() {
   const ref = useRef<SheetRef>(null);
   const snapTo = (i: number) => ref.current?.snapTo(i);
 
+  const [tiles, setTiles] = useState([]);
+  useEffect(() => {
+    fetch(`https://ways-api.azurewebsites.net/api/tile/`)
+        .then(response => response.json())
+        .then((data) => setTiles(data));
+}, []);
+
   let selected_products = [{x:'27', y:'4', name: 'Borisi'}, {x:'33', y:'3', name: 'Atanasi'}, {x:'35', y:'20', name: 'Kalini'}]
 
   return (
     <div className="content-container">
       
       <div className="map-container">
-        <Map selectedProducts={selected_products}/>
+        <Map tiles={tiles} selectedProducts={selected_products}/>
       </div>
 
 
