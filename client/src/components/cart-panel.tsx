@@ -8,6 +8,7 @@ import { A11ySheet } from './a11-sheet';
 function CartPanel() {
   const sheetState = useOverlayTriggerState({});
   const navigate = useNavigate();
+  const tempImageUrl = "https://www.healthyeating.org/images/default-source/home-0.0/nutrition-topics-2.0/general-nutrition-wellness/2-2-2-3foodgroups_fruits_detailfeature.jpg?sfvrsn=64942d53_4";
 
   return (
     <>
@@ -20,15 +21,15 @@ function CartPanel() {
           <div className="cart-products-container">
             <h2>Количка:</h2>
             <div className="scrollable">
-              <ProductCartCard name="Банани" imageUrl="/public/fruits.jpg" price={10} quantity={2} />
-              <ProductCartCard name="Атанаси" imageUrl="/public/fruits.jpg" price={20} quantity={1} />
-              <ProductCartCard name="Бориси" imageUrl="/public/fruits.jpg" price={30} quantity={3} />
-              <ProductCartCard name="Банани" imageUrl="/public/fruits.jpg" price={10} quantity={2} />
-              <ProductCartCard name="Атанаси" imageUrl="/public/fruits.jpg" price={20} quantity={1} />
-              <ProductCartCard name="Бориси" imageUrl="/public/fruits.jpg" price={30} quantity={3} />
-              <ProductCartCard name="Банани" imageUrl="/public/fruits.jpg" price={10} quantity={2} />
-              <ProductCartCard name="Атанаси" imageUrl="/public/fruits.jpg" price={20} quantity={1} />
-              <ProductCartCard name="Бориси" imageUrl="/public/fruits.jpg" price={30} quantity={3} />
+              <ProductCartCard name="Банани" imageUrl={tempImageUrl} price={10} quantity={2} />
+              <ProductCartCard name="Атанаси" imageUrl={tempImageUrl} price={20} quantity={1} />
+              <ProductCartCard name="Бориси" imageUrl={tempImageUrl} price={30} quantity={3} />
+              <ProductCartCard name="Банани" imageUrl={tempImageUrl} price={10} quantity={2} />
+              <ProductCartCard name="Атанаси" imageUrl={tempImageUrl} price={20} quantity={1} />
+              <ProductCartCard name="Бориси" imageUrl={tempImageUrl} price={30} quantity={3} />
+              <ProductCartCard name="Банани" imageUrl={tempImageUrl} price={10} quantity={2} />
+              <ProductCartCard name="Атанаси" imageUrl={tempImageUrl} price={20} quantity={1} />
+              <ProductCartCard name="Бориси" imageUrl={tempImageUrl} price={30} quantity={3} />
             </div>
             <div className="cart-product-sum">
               <div className="horizontal-line"></div>

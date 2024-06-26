@@ -4,8 +4,19 @@ import StoreNavigationCard from '../components/store-navigation-card';
 import '../styles/page-styles/store-navigation.scss';
 
 function StoreNavigation() {
-  const [isOpen, setOpen] = useState(true);
-  const [boxes, setBoxes] = useState([0, 1, 2, 3]);
+  const tempImageUrl = "https://www.healthyeating.org/images/default-source/home-0.0/nutrition-topics-2.0/general-nutrition-wellness/2-2-2-3foodgroups_fruits_detailfeature.jpg?sfvrsn=64942d53_4";
+  const [isOpen] = useState(true);
+  const [availableItems] = useState([
+    { name: "Банани", quantity: 2, imageUrl: tempImageUrl, price: 10, isNext: false, isAcquired: false, isGoldenEgg: false, isCheckout: false },
+    { name: "Атанани", quantity: 3, imageUrl: tempImageUrl, price: 15, isNext: false, isAcquired: false, isGoldenEgg: true, isCheckout: false },
+    { name: "Борани", quantity: 3, imageUrl: tempImageUrl, price: 15, isNext: false, isAcquired: false, isGoldenEgg: false, isCheckout: false }
+
+  ]);
+  const [acquiredItems] = useState([
+    { name: "Калани", quantity: 2, imageUrl: tempImageUrl, price: 10, isNext: false, isAcquired: true, isGoldenEgg: false, isCheckout: false },
+    { name: "Стояни", quantity: 3, imageUrl: tempImageUrl, price: 15, isNext: false, isAcquired: true, isGoldenEgg: false, isCheckout: false },
+    { name: "Никиани", quantity: 3, imageUrl: tempImageUrl, price: 15, isNext: false, isAcquired: true, isGoldenEgg: false, isCheckout: false }
+  ]);
   const ref = useRef<SheetRef>(null);
   const snapTo = (i: number) => ref.current?.snapTo(i);
 
@@ -26,14 +37,30 @@ function StoreNavigation() {
             <Sheet.Scroller>
               <div className="sheet-content">
                 <h4>Следващ продукт:</h4>
-                {boxes.map((_, i) => (
+                {availableItems.map((_, i) => (
                   <StoreNavigationCard
-                    name="Банани"
-                    imageUrl="/public/fruits.jpg"
-                    price={10}
-                    quantity={2}
+                    name={availableItems[i].name}
+                    imageUrl={availableItems[i].imageUrl}
+                    price={availableItems[i].price}
+                    quantity={availableItems[i].quantity}
                     isNext={i === 0}
                     isAcquired={false}
+                    isGoldenEgg={availableItems[i].isGoldenEgg}
+                    isCheckout={false}
+                    key={i}
+                    />
+                ))}
+                <h4>Взети продукт:</h4>
+                {acquiredItems.map((_, i) => (
+                  <StoreNavigationCard
+                    name={acquiredItems[i].name}
+                    imageUrl={acquiredItems[i].imageUrl}
+                    price={acquiredItems[i].price}
+                    quantity={acquiredItems[i].quantity}
+                    isNext={false}
+                    isAcquired={true}
+                    isGoldenEgg={false}
+                    isCheckout={false}
                     key={i}
                     />
                 ))}

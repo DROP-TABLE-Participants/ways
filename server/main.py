@@ -2,6 +2,7 @@ import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from starlette.middleware.cors import CORSMiddleware
 
 from tortoise.contrib.fastapi import RegisterTortoise
 
@@ -14,6 +15,15 @@ def create_application(lifespan) -> FastAPI:
     application = FastAPI(lifespan=lifespan)
     application.include_router(apiRouter)
     application.include_router(wsRouter)
+    origins = ["*"]
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
     return application
 
 
