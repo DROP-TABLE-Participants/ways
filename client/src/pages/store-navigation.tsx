@@ -8,6 +8,7 @@ function StoreNavigation() {
   const [boxes] = useState([0, 1, 2, 3]);
   const ref = useRef<SheetRef>(null);
   const snapTo = (i: number) => ref.current?.snapTo(i);
+  const tempImageUrl = "https://www.healthyeating.org/images/default-source/home-0.0/nutrition-topics-2.0/general-nutrition-wellness/2-2-2-3foodgroups_fruits_detailfeature.jpg?sfvrsn=64942d53_4";
 
   return (
     <div className="container">
@@ -29,7 +30,7 @@ function StoreNavigation() {
                 {boxes.map((_, i) => (
                   <StoreNavigationCard
                     name="Банани"
-                    imageUrl="/public/fruits.jpg"
+                    imageUrl={tempImageUrl}
                     price={10}
                     quantity={2}
                     isNext={i === 0}
