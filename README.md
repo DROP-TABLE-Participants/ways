@@ -9,7 +9,7 @@
 </p>
 
 ## 💻 About
-<h2 align="center">Ways - ...</h2>
+<h2 align="center">Ways - Organized shopping</h2>
 
 ## 🗂️ Tech Stack:
 ### Front-end
@@ -63,7 +63,7 @@ Pasting this line of code in **your favourite Terminal**:
 
 <h3><B>Website domain:</B></h3>
 
-<pre>{link}</pre>
+<pre>https://icy-island-00ed8aa03.5.azurestaticapps.net/</pre>
 
 <hr>
 
