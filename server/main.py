@@ -2,12 +2,16 @@ import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.responses import Response
 from starlette.middleware.cors import CORSMiddleware
 
 from tortoise.contrib.fastapi import RegisterTortoise
 
-from api.routers.api import apiRouter
+
 from seed import Seeder
+from redis_client import redis_client
+
+from api.routers.api import apiRouter
 from ws.routes.ws import wsRouter
 
 
@@ -46,3 +50,8 @@ async def lifespan(app: FastAPI):
 
 
 app = create_application(lifespan=lifespan)
+
+@app.get("/")
+def hello():
+    print(redis_client.time())
+    return Response("Hello, world!", status_code=200)

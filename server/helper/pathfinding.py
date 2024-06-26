@@ -2,7 +2,7 @@ import time
 import itertools
 from typing import List, Tuple
 
-from astar import AStar
+from .astar import AStar
 
 
 def get_path(items: List[str]):
@@ -11,6 +11,7 @@ def get_path(items: List[str]):
     paths = {}
 
     for node1, node2 in itertools.combinations(items + ["EN", "EX"], 2):
+        print("finding distance between", node1, node2)
         distance, path = astar.search(astar.get_point(node1), astar.get_point(node2))
 
         paths[(node1, node2)] = [distance, path]
@@ -45,6 +46,8 @@ def get_path(items: List[str]):
         distances.append([dis, path])
 
     t1 = time.time()
+
+    print(distances)
 
     return min(distances, key=lambda x: x[0])
 

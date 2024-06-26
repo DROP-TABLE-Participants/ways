@@ -1,7 +1,7 @@
-import logging
+import os
 import heapq
 import json
-from graph import Node
+from .graph import Node
 
 
 class AStar:
@@ -38,7 +38,7 @@ class AStar:
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         ]
 
-        file = open("../exampleData/placements.json", "r")
+        file = open(os.path.join(os.getcwd(), "exampleData/placements.json"), "r")
 
         json_content = json.loads(file.read())
 
