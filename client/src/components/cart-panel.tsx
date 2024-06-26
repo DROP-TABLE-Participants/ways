@@ -13,7 +13,7 @@ function CartPanel() {
   return (
     <>
       <div className="cart-button" onClick={sheetState.open}>
-        <CartIcon />
+        <CartIcon/>
       </div>
 
       <A11ySheet state={sheetState} label="Accessible bottom sheet">
