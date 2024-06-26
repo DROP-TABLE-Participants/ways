@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Sheet, type SheetRef } from 'react-modal-sheet';
 import StoreNavigationCard from '../components/store-navigation-card';
 import '../styles/page-styles/store-navigation.scss';
+import Map from '../components/map';
 
 function StoreNavigation() {
   const tempImageUrl = "https://www.healthyeating.org/images/default-source/home-0.0/nutrition-topics-2.0/general-nutrition-wellness/2-2-2-3foodgroups_fruits_detailfeature.jpg?sfvrsn=64942d53_4";
@@ -20,8 +21,16 @@ function StoreNavigation() {
   const ref = useRef<SheetRef>(null);
   const snapTo = (i: number) => ref.current?.snapTo(i);
 
+  let selected_products = [{x:'27', y:'4', name: 'Borisi'}, {x:'33', y:'3', name: 'Atanasi'}, {x:'35', y:'20', name: 'Kalini'}]
+
   return (
-    <div className="container">
+    <div className="content-container">
+      
+      <div className="map-container">
+        <Map selectedProducts={selected_products}/>
+      </div>
+
+
       <Sheet
         ref={ref}
         isOpen={isOpen}
