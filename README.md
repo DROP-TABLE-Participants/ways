@@ -1,4 +1,6 @@
-![Image]()
+<p align="center">
+    <img alt="logo" width=300px src="https://github.com/DROP-TABLE-Participants/ways/assets/63718749/94226c23-004a-41e0-abad-fa1f5b5dbfd0">
+</p>
 
 <h1 align="center">Team Drop Table Participants</h1>
 
