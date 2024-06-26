@@ -44,21 +44,21 @@ async def put_cart(request: Request, response: Response, cart: CartItem, user_id
     else:
         cart_cookie = json.loads(cart_cookie)
 
-  
     is_found = False
-   
+
     for item in cart_cookie:
         if item["product_id"] == cart.product_id:
             item["quantity"] += cart.quantity
             is_found = True
             break
-            
+
     if not is_found:
         cart_cookie.append(cart.dict())
 
-    response.set_cookie("cart", json.dumps(cart_cookie, cls=CartItemEncoder))
+    response.set_cookie("cart", json.dumps(cart_cookie, cls=CartItemEncoder), samesite="none", secure=True)
 
     return {"message": "Cart updated"}
+
 
 @cart_endpoints.delete("/")
 async def delete_cart(request: Request, response: Response, cart: CartItem, user_id: str = Depends(get_user_id)):
@@ -76,6 +76,6 @@ async def delete_cart(request: Request, response: Response, cart: CartItem, user
                 cart_cookie.remove(item)
             break
 
-    response.set_cookie("cart", json.dumps(cart_cookie, cls=CartItemEncoder))
+    response.set_cookie("cart", json.dumps(cart_cookie, cls=CartItemEncoder), samesite="none", secure=True)
 
     return {"message": "Cart updated"}

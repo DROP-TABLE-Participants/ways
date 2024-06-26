@@ -14,7 +14,7 @@ async def create_session():
 
     response = JSONResponse(content={"message": "created session", "userId": session.user_id})
 
-    response.set_cookie("token", session.token)
+    response.set_cookie("token", session.token, samesite="none", secure=True)
 
     return response
 
