@@ -71,7 +71,7 @@
   .product-card-golden-egg {
     border: 2px solid #FDD711;
 
-    .product-card-quantity {
+    .quantity-number {
         display: none;
       }
 
@@ -87,6 +87,10 @@
     border: 0.802px solid #E5E5E5;
 
     .product-card-image {
+      display: none;
+    }
+
+    .quantity-number {
       display: none;
     }
 
