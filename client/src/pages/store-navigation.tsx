@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Sheet, type SheetRef } from 'react-modal-sheet';
-import ProductCartCard from '../components/cart-product-card';
+import StoreNavigationCard from '../components/store-navigation-card';
 import '../styles/page-styles/store-navigation.scss';
 
 function StoreNavigation() {
@@ -27,11 +27,13 @@ function StoreNavigation() {
               <div className="sheet-content">
                 <h4>Следващ продукт:</h4>
                 {boxes.map((_, i) => (
-                  <ProductCartCard
+                  <StoreNavigationCard
                     name="Банани"
                     imageUrl="/public/fruits.jpg"
                     price={10}
                     quantity={2}
+                    isNext={i === 0}
+                    isAcquired={false}
                     key={i}
                     />
                 ))}
