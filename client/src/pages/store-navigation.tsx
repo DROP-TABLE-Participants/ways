@@ -4,8 +4,8 @@ import StoreNavigationCard from '../components/store-navigation-card';
 import '../styles/page-styles/store-navigation.scss';
 
 function StoreNavigation() {
-  const [isOpen, setOpen] = useState(true);
-  const [boxes, setBoxes] = useState([0, 1, 2, 3]);
+  const [isOpen] = useState(true);
+  const [boxes] = useState([0, 1, 2, 3]);
   const ref = useRef<SheetRef>(null);
   const snapTo = (i: number) => ref.current?.snapTo(i);
 

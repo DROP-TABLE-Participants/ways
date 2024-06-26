@@ -3,16 +3,9 @@ import '../styles/page-styles/catalog.scss';
 import SearchBar from '../components/search-bar';
 import ProductCategoryCard from '../components/product-category-card';
 import CartPanel from '../components/cart-panel';
-import CartIcon from '../components/icons/cart-icon';
-
 
 function Catalog() {
-    const [productCategories, setProductCategories] = useState([{ name: 'Плодове', imageUrl: 'public/fruits.jpg' }, { name: 'Плодове', imageUrl: 'public/fruits.jpg' }, { name: 'Плодове', imageUrl: 'public/fruits.jpg' }, { name: 'Плодове', imageUrl: 'public/fruits.jpg'}, { name: 'Плодове', imageUrl: 'public/fruits.jpg'}, { name: 'Плодове', imageUrl: 'public/fruits.jpg'}, { name: 'Плодове', imageUrl: 'public/fruits.jpg'}, { name: 'Плодове', imageUrl: 'public/fruits.jpg'}])
-    const [cartPopupState, setCartPopupState] = useState(false)
-
-    const onCartButtonClick = () => {
-        setCartPopupState(!cartPopupState)
-    }
+    const [productCategories] = useState([{ name: 'Плодове', imageUrl: 'public/fruits.jpg' }, { name: 'Плодове', imageUrl: 'public/fruits.jpg' }, { name: 'Плодове', imageUrl: 'public/fruits.jpg' }, { name: 'Плодове', imageUrl: 'public/fruits.jpg'}, { name: 'Плодове', imageUrl: 'public/fruits.jpg'}, { name: 'Плодове', imageUrl: 'public/fruits.jpg'}, { name: 'Плодове', imageUrl: 'public/fruits.jpg'}, { name: 'Плодове', imageUrl: 'public/fruits.jpg'}])
 
         return (
             <div className="container">

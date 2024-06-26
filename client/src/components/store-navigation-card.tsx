@@ -1,4 +1,4 @@
-import '../styles/component-styles/cart-product-card.scss';
+import '../styles/component-styles/store-navigation-card.scss';
 
 interface StoreNavigationCardProps {
     name: string;
