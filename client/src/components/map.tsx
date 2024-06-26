@@ -139,7 +139,7 @@ function Map ({tiles, selectedProducts}: {tiles: Array<any>, selectedProducts: A
 
   const [cameraMode, setCameraMode] = useState(CAMERA_MODES.TILTED);
 
-  const ProductTile = ({ id, x, y, type }: any) => {
+  const ProductTile = ({ x, y, type }: any) => {
     const ref: any = useRef();
     const material: any = useRef();
   
