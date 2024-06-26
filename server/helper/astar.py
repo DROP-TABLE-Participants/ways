@@ -51,10 +51,12 @@ class AStar:
     def get_neighbors(self, node):
         neighbors = []
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+        old_node = self.maze[node.x][node.y]
         for direction in directions:
             new_x, new_y = node.x + direction[0], node.y + direction[1]
+            new_node = self.maze[new_x][new_y]
             if 0 <= new_x < len(self.maze) and 0 <= new_y < len(self.maze[0]):
-                if self.maze[new_x][new_y] in self.good_points:
+                if new_node in self.good_points and not (str(old_node).startswith("P") and str(new_node).startswith("P")):
                     neighbors.append(Node(new_x, new_y))
         return neighbors
 
