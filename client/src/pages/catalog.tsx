@@ -4,6 +4,7 @@ import SearchBar from '../components/search-bar';
 import ProductCategoryCard from '../components/product-category-card';
 import CartPanel from '../components/cart-panel';
 import { useNavigate } from 'react-router-dom';
+import categoryUrls from '../assets/category-urls.jsx'
 
 type ProductCategory = {
     name: string;
@@ -19,7 +20,7 @@ function Catalog() {
         fetch('https://ways-api.azurewebsites.net/api/product/categories')
             .then(response => response.json())
             .then((data: string[]) => setProductCategories(
-                data.map(item => ({name: item, imageUrl: tempImageUrl}))
+                data.map(item => ({name: item, imageUrl: categoryUrls[item]}))
             ));
     }, []);
     
