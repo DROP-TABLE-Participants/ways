@@ -19,11 +19,13 @@ export function A11ySheet({
   state, label, children, ...rest
 }: PropsWithChildren<SheetProps>) {
   return (
-    <Sheet {...rest} isOpen={state.isOpen} onClose={state.close}>
+    <Sheet {...rest} isOpen={state.isOpen} onClose={state.close} >
       <OverlayProvider>
         <FocusScope contain autoFocus restoreFocus>
           <A11ySheetContent state={state} label={label}>
-            {children}
+            <Sheet.Scroller>
+              {children}
+            </Sheet.Scroller>
           </A11ySheetContent>
         </FocusScope>
       </OverlayProvider>
