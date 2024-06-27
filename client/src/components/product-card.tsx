@@ -7,11 +7,12 @@ interface ProductCardProps {
     price: number;
     quantity?: number;
     inCart?: boolean;
+    index: number
 }
 
 function ProductCard (props: ProductCardProps) {
     return (
-        <div className="product-card">
+        <div className="product-card" style={{animationDelay: `${props.index * 40}ms`}}>
             <img src={props.imageUrl} alt={props.name} className="product-card-image" />
             <div className="product-card-info-container">
                 <p className="product-card-name">{props.name}</p>

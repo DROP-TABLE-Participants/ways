@@ -6,6 +6,9 @@
     height: 150px;
     overflow: hidden;
     cursor: pointer;
+    opacity: 0;
+    animation: product-category-card-enter .9s ease forwards;
+
   
     .product-category-card-image {
       object-fit: cover;
@@ -39,3 +42,16 @@
     }
   }
   
+
+@keyframes product-category-card-enter {
+0%, 40% {
+  opacity: 0;
+    -webkit-transform: translate3d(0, 15px, 0);
+    transform: translate3d(0, 15px, 0);
+}
+100% {
+    opacity: 1;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+}
