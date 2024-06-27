@@ -9,6 +9,7 @@ from .astar import AStar
 
 
 def get_path(items: List[str]):
+    t0 = time.time()
     astar = AStar(items)
     paths = {}
 
@@ -55,6 +56,10 @@ def get_path(items: List[str]):
             dis += the_distance
             path.extend(the_path)
 
-        distances.append([dis, path])
+        distances.append([dis, path, whole_path])
+
+    t1 = time.time()
+
+    print(t1 - t0)
 
     return min(distances, key=lambda x: x[0])
