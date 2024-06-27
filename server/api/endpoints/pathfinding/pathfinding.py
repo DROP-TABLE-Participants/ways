@@ -14,7 +14,7 @@ async def get_route(request: Request, response: Response, user_id: str = Depends
 
     path = get_path(cart)
 
-    return { "path": path[1], "distance": path[0], "products": path[2]}
+    return {"path": path[1], "distance": path[0], "products": path[2]}
 
 
 

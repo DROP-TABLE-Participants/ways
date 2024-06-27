@@ -28,7 +28,7 @@ def get_path(items: List[str]):
             distance, path = pickle.loads(cached_path.encode("latin1"))
 
             paths[(node1, node2)] = [distance, path]
-            paths[(node2, node1)] = [distance, path]
+            paths[(node2, node1)] = [distance, path[::-1]]
 
     distances = []
 
