@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Toaster, toast } from 'sonner';
 
 function Admin() {
-    const [tiles, setTiles] = useState<{ id: string, x: number, y: number }[]>([]);
+    const [tiles, setTiles] = useState<{ id: string, x: number, y: number, type: number }[]>([]);
     const [gridSize, setGridSize] = useState<{ rows: number, columns: number }>({ rows: 21, columns: 41 });
     const [deleteOperations, setDeleteOperations] = useState<string[]>([]);
     const [putOperations, setPutOperations] = useState<{ x: number, y: number, type: number }[]>([]);
@@ -16,7 +16,7 @@ function Admin() {
             navigator('/login');
         }
 
-        fetch(`https://ways-api.azurewebsites.net/api/tile`)
+        fetch('https://ways-api.azurewebsites.net/api/tile')
             .then(response => response.json())
             .then((data) => setTiles(data));
     }, []);
@@ -39,8 +39,7 @@ function Admin() {
                 'Content-Type': 'application/json'
             },
             credentials: 'include'
-        }
-        )
+        });
         localStorage.removeItem('isLoggedIn');
         navigator('/');
         location.reload();
@@ -68,7 +67,7 @@ function Admin() {
         );
 
         const putPromises = putOperations.map(tile =>
-            fetch(`https://ways-api.azurewebsites.net/api/tile`, {
+            fetch('https://ways-api.azurewebsites.net/api/tile', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -93,10 +92,24 @@ function Admin() {
         setDeleteOperations([]);
         setPutOperations([]);
 
-        const res = await fetch(`https://ways-api.azurewebsites.net/api/tile`);
+        const res = await fetch('https://ways-api.azurewebsites.net/api/tile');
         const data = await res.json();
 
         setTiles(data);
+    };
+
+    const getTileClass = (type: number) => {
+        switch(type) {
+            case 0: return 'product';
+            case 1: return 'self-checkout';
+            case 2: return 'card-only-self-checkout';
+            case 3: return 'cash-register';
+            case 4: return 'wall';
+            case 5: return 'easter-egg';
+            case 6: return 'enter';
+            case 7: return 'exit';
+            default: return '';
+        }
     };
 
     const renderGridItems = () => {
@@ -111,7 +124,7 @@ function Admin() {
                     gridItems.push(
                         <div
                             key={tile!.id}
-                            className="grid-item tile"
+                            className={`grid-item tile ${getTileClass(tile!.type)}`}
                             style={{ gridRow: row + 1, gridColumn: col + 1 }}
                             onClick={() => handleDelete(tile!.id)}
                         >
@@ -133,6 +146,30 @@ function Admin() {
         return gridItems;
     };
 
+    const renderLegend = () => {
+        const legendItems = [
+            { className: 'product', label: 'Product' },
+            { className: 'self-checkout', label: 'Self Checkout' },
+            { className: 'card-only-self-checkout', label: 'Card Only Self Checkout' },
+            { className: 'cash-register', label: 'Cash Register' },
+            { className: 'wall', label: 'Wall' },
+            { className: 'easter-egg', label: 'Easter Egg' },
+            { className: 'enter', label: 'Enter' },
+            { className: 'exit', label: 'Exit' }
+        ];
+
+        return (
+            <div className="legend">
+                {legendItems.map(item => (
+                    <div key={item.className} className="legend-item">
+                        <div className={`legend-tile grid-item ${item.className}`}></div>
+                        <span>{item.label}</span>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
     return (
         <div className="admin-container">
             <Toaster richColors />
@@ -141,6 +178,7 @@ function Admin() {
             <div className="grid-container">
                 {renderGridItems()}
             </div>
+            {renderLegend()}
             <button onClick={handleSaveChanges} className="save-button">Запази промените</button>
             <button onClick={handleLogout} className="logout-button">Излез</button>
         </div>
