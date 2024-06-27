@@ -8,11 +8,11 @@ class Product(Model):
     name = fields.TextField()
     category = fields.TextField()
     price = fields.IntField()
-    legacy_product_id = fields.TextField()
+    legacy_product_id = fields.TextField(null=True)
 
     def __str__(self):
         return self.name
 
 
 Product_Pydantic = pydantic_model_creator(Product, name="Product")
-ProductIn_Pydantic = pydantic_model_creator(Product, name="ProductIn", exclude_readonly=True)
+ProductIn_Pydantic = pydantic_model_creator(Product, name="ProductIn", exclude_readonly=True, exclude=('legacy_product_id',))

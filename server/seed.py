@@ -1,4 +1,5 @@
 import csv
+import json
 from random import randint
 
 from models.product import ProductIn_Pydantic
@@ -121,3 +122,17 @@ class Seeder:
         for tile in tiles:
             tile_in = TileWithoutProductIn_Pydantic(**tile)
             await TileService.create_tile(tile_in)
+
+        with open('exampleData/placements.json', 'r', encoding='utf-8') as file:
+            placements = json.load(file)
+
+        for placement in placements:
+            # filter products by x and y
+            product = await ProductService.get_product_by_x_y(placement['x'], placement['y'])
+
+            if product:
+                product.legacy_product_id = placement['product_id']
+
+                await product.save()
+
+

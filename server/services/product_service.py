@@ -1,6 +1,7 @@
 from tortoise.functions import Count
 
 from models.product import Product_Pydantic, ProductIn_Pydantic, Product
+from models.tile import Tile
 
 
 class ProductService:
@@ -37,3 +38,11 @@ class ProductService:
     @staticmethod
     async def get_product_by_id(product_id: int):
         return await Product_Pydantic.from_queryset_single(Product.get(id=product_id))
+
+    @staticmethod
+    async def get_product_by_x_y(x: int, y: int):
+        tile = await Tile.get(x=x, y=y)
+
+        if tile.product:
+            product = await tile.product.get()
+            return await Product.filter(id=product.id).first()
