@@ -41,7 +41,7 @@ class ProductService:
 
     @staticmethod
     async def get_product_by_x_y(x: int, y: int):
-        tile = await Tile.get(x=x, y=y)
+        tile = await Tile.filter(x=x, y=y).first()
 
         if tile.product:
             product = await tile.product.get()
