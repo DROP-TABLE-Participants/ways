@@ -8,6 +8,7 @@ class Product(Model):
     name = fields.TextField()
     category = fields.TextField()
     price = fields.IntField()
+    legacy_product_id = fields.TextField()
 
     def __str__(self):
         return self.name

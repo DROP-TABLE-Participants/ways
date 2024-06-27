@@ -8,9 +8,11 @@ from redis_client import redis_client
 from .astar import AStar
 
 
-def get_path(items: List[str]):
+async def get_path(items: List[str]):
     t0 = time.time()
     astar = AStar(items)
+    await astar.init_maze()
+
     paths = {}
 
     for node1, node2 in itertools.combinations(items + ["EN", "EX"], 2):
