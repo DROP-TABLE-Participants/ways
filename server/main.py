@@ -19,7 +19,7 @@ def create_application(lifespan) -> FastAPI:
     application = FastAPI(lifespan=lifespan)
     application.include_router(apiRouter)
     application.include_router(wsRouter)
-    origins = ["https://localhost:5173", "https://icy-island-00ed8aa03.5.azurestaticapps.net"]
+    origins = ["https://localhost:5173", "https://icy-island-00ed8aa03.5.azurestaticapps.net", "https://172.20.10.2:5173"]
     application.add_middleware(
         CORSMiddleware,
         allow_origins=origins,

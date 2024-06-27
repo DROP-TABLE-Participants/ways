@@ -23,10 +23,19 @@ function StoreNavigation() {
 
   const [tiles, setTiles] = useState([]);
   useEffect(() => {
-    fetch(`https://ways-api.azurewebsites.net/api/tile/`)
+    fetch(`https://ways-api.azurewebsites.net/api/tile`)
         .then(response => response.json())
         .then((data) => setTiles(data));
 }, []);
+
+  const [path, setPath] = useState([])
+  useEffect(()=>{
+    fetch(`https://ways-api.azurewebsites.net/api/pathfinding`, {
+      credentials: 'include'
+    })
+        .then(response => response.json())
+        .then((data) => {setPath(data.path[1])});
+  }, [])
 
   let selected_products = [{x:'27', y:'4', name: 'Borisi'}, {x:'33', y:'3', name: 'Atanasi'}, {x:'35', y:'20', name: 'Kalini'}]
 
@@ -34,7 +43,7 @@ function StoreNavigation() {
     <div className="content-container">
       
       <div className="map-container">
-        <Map tiles={tiles} selectedProducts={selected_products}/>
+        <Map tiles={tiles} selectedProducts={selected_products} path={path}/>
       </div>
 
 

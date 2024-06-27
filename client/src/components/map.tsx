@@ -4,9 +4,12 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 // import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
 import TWEEN from '@tweenjs/tween.js';
 // import tiles from './../assets/placement.json'
-import { shaderMaterial } from '@react-three/drei';
+import { Line, shaderMaterial } from '@react-three/drei';
+import { LineGeometry, LineMaterial } from 'three/examples/jsm/Addons.js';
 
 // extend({ CSS2DRenderer, CSS2DObject });
+
+const tileSize = 1; // Global tile size variable
 
 const calcDimensions = (tiles: Array<any>) => {
   let minX: number = Infinity, minY: number = Infinity, maxX: number = -Infinity, maxY: number = -Infinity;
@@ -28,18 +31,18 @@ const calcDimensions = (tiles: Array<any>) => {
 
   const centerX = (minX + maxX) / 2;
   const centerY = (minY + maxY) / 2;
-  const mapWidth = (maxX - minX + 1) * 0.2;
-  const mapHeight = (maxY - minY + 1) * 0.2;
+  const mapWidth = (maxX - minX + 1) * tileSize;
+  const mapHeight = (maxY - minY + 1) * tileSize;
 
   return {
     centerX,
     centerY,
     mapWidth,
     mapHeight,
-    blockedWidth: (blockedMaxX - blockedMinX + 1) * 0.2,
-    blockedHeight: (blockedMaxY - blockedMinY + 1) * 0.2,
-    blockedCenterX: (blockedMinX + blockedMaxX) / 2 * 0.2,
-    blockedCenterY: (blockedMinY + blockedMaxY) / 2 * 0.2
+    blockedWidth: (blockedMaxX - blockedMinX + 1) * tileSize,
+    blockedHeight: (blockedMaxY - blockedMinY + 1) * tileSize,
+    blockedCenterX: (blockedMinX + blockedMaxX) / 2 * tileSize,
+    blockedCenterY: (blockedMinY + blockedMaxY) / 2 * tileSize
   };
 };
 
@@ -47,7 +50,8 @@ const GradientMaterial = shaderMaterial(
   {
     color1: new THREE.Color('#bad2e9'),
     color2: new THREE.Color('#f3f8fc'),
-    time: 0
+    time: 0,
+    tileSize: tileSize
   },
   `
     varying vec3 vPosition;
@@ -60,9 +64,10 @@ const GradientMaterial = shaderMaterial(
   `
     uniform vec3 color1;
     uniform vec3 color2;
+    uniform float tileSize;
     varying vec3 vPosition;
     void main() {
-      float height = (vPosition.y + 0.25) / 0.5;
+      float height = (vPosition.y + tileSize);
       vec3 color = mix(color1, color2, height);
       gl_FragColor = vec4(color, 1.0);
     }
@@ -73,7 +78,8 @@ const PulsingMaterial = shaderMaterial(
   {
     baseColor: new THREE.Color('#bad2e9'),
     pulseColor: new THREE.Color('#0e0eff'),
-    time: 0
+    time: 0,
+    tileSize: tileSize
   },
   `
     varying vec3 vPosition;
@@ -86,9 +92,10 @@ const PulsingMaterial = shaderMaterial(
     uniform vec3 baseColor;
     uniform vec3 pulseColor;
     uniform float time;
+    uniform float tileSize;
     varying vec3 vPosition;
     void main() {
-      float height = (vPosition.y + 0.25) / 0.5;
+      float height = (vPosition.y + tileSize) / 0.5;
       vec3 color = mix(baseColor, pulseColor, abs(sin(time * 3.0)) * height);
       gl_FragColor = vec4(color, 1.0);
     }
@@ -125,9 +132,51 @@ const BlockedArea = ({ blockedCenterX, blockedCenterY, blockedWidth, blockedHeig
   </mesh>)
 };
 
-function Map ({tiles, selectedProducts}: {tiles: Array<any>, selectedProducts: Array<any>}) {
+const Path = ({ points }) => {
+  const material = new LineMaterial({
+    color: 0x0000ff, // Blue as a base color
+    linewidth: 0.002, // Width of the line, adjust as needed
+    vertexColors: true
+  });
+
+  const vertices: any = [];
+  const lineDistances: any = [];
+  let totalDistance = 0;
+
+  points.forEach((point, i) => {
+      vertices.push(point[1], 0, point[0]); // Assuming y is up axis
+      if (i > 0) {
+          totalDistance += new THREE.Vector3(point[1], 0, point[0]).distanceTo(new THREE.Vector3(points[i - 1][1], 0, points[i - 1][0]));
+      }
+      lineDistances.push(totalDistance);
+  });
+
+  const geometry = new LineGeometry();
+  geometry.setPositions(vertices);
+
+  // Update the time uniform in the material
+  useFrame(({ clock }) => {
+    const time = clock.getElapsedTime();
+    const colors = [];
+
+    for (let i = 0; i < vertices.length; i += 3) {
+        const pulse = (Math.sin(time + vertices[i] * 0.5) + 1) / 2;
+        colors.push(0, 0, 1 - pulse); // Creating a blue gradient with a pulsing effect
+    }
+
+    geometry.setColors(colors);
+    material.uniformsNeedUpdate = true; // Ensure the material updates with the animation
+  });
+
+  return (
+      <Line geometry={geometry} material={material} points={vertices} />
+  );
+}
+
+function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProducts: Array<any>, path: Array<any>}) {
   const { centerX, centerY, mapWidth, mapHeight, blockedWidth, blockedHeight, blockedCenterX, blockedCenterY } = calcDimensions(tiles);
-  const initialDistance = Math.max(mapWidth, mapHeight) / 2 / Math.tan(THREE.MathUtils.degToRad(20));
+  const initialDistance = (Math.max(mapWidth, mapHeight) * 2) / Math.tan(THREE.MathUtils.degToRad(45));
+  const cameraPosition: any = [centerX * tileSize, initialDistance, centerY * tileSize];
   
   const personRef: any = useRef();
   const controlsRef: any = useRef();
@@ -151,7 +200,7 @@ function Map ({tiles, selectedProducts}: {tiles: Array<any>, selectedProducts: A
 
     useFrame(() => {
         TWEEN.update();
-        updateCamera();
+        // updateCamera();
       });
 
     if(selectedProducts) {
@@ -173,10 +222,10 @@ function Map ({tiles, selectedProducts}: {tiles: Array<any>, selectedProducts: A
       }
     });
   
-    const geometry = type === 0 || type === 5 ? new THREE.BoxGeometry(0.2, 0.5, 0.2) : new THREE.BoxGeometry(0.2, 0.2, 0.2);
+    const geometry = new THREE.BoxGeometry(tileSize, (type === 0 || type === 5) ? tileSize * 2 : tileSize, tileSize);
   
     return (
-      <mesh ref={ref} position={[x * 0.2, geometry.parameters.height / 2, y * 0.2]} material={material.current} castShadow receiveShadow>
+      <mesh ref={ref} position={[x * tileSize, geometry.parameters.height / 2, y * tileSize]} material={material.current} castShadow receiveShadow>
         <primitive object={geometry} attach="geometry" />
         {/* {isSelected && (
           <CSS2DObject>
@@ -201,7 +250,7 @@ function Map ({tiles, selectedProducts}: {tiles: Array<any>, selectedProducts: A
 
   const Floor = () => {
     return (
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[centerX * 0.2, 0, centerY * 0.2]} receiveShadow>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[centerX * tileSize, 0, centerY * tileSize]} receiveShadow>
         <planeGeometry attach="geometry" args={[100, 100]} />
         <meshPhongMaterial attach="material" color="#dfe9f5" side={THREE.DoubleSide} />
       </mesh>
@@ -251,18 +300,18 @@ function Map ({tiles, selectedProducts}: {tiles: Array<any>, selectedProducts: A
   
     // This function adjusts camera position for tilted view
     const setTiltedView = () => {
-      const offset = new THREE.Vector3(0, 2, -5); // Offset for the tilted view
+      const offset = new THREE.Vector3(0, 10, -13); // Offset for the tilted view
       const tiltedPosition = personRef.current.position.clone().add(offset);
       camera.position.copy(tiltedPosition);
       camera.lookAt(personRef.current.position);
       camera.up.set(0, 1, 0); // Reset the up vector to default
     };
 
-    useEffect(() => {
-      if (personRef.current && !initialPositionSet.current) {
-        setInitialCameraPosition();
-      }
-    }, [personRef.current]); 
+    // useEffect(() => {
+    //   if (personRef.current && !initialPositionSet.current) {
+    //     setInitialCameraPosition();
+    //   }
+    // }, [personRef.current]); 
 
     useEffect(()=>{
       if (cameraMode == CAMERA_MODES.TOP_DOWN) {
@@ -483,13 +532,14 @@ const handleTouchEnd = () => {
 
   return (
     <>
-      <Canvas camera={{ position: [centerX * 0.2 - 6, initialDistance / 3, centerY * 0.2] }} shadows="soft">
+      <Canvas camera={{ position: cameraPosition, fov: 90, near: 0.1, far: 1000 }} shadows="soft">
         <CameraControls personRef={personRef} cameraMode={cameraMode}/>
         <color attach="background" args={['#dfe9f5']} />
         <Floor />
+        <Path points={path}/>
         <ambientLight intensity={20} color='#eff5fb'/>
         <directionalLight position={[10, 20, 10]} intensity={1} color='#f2f5fa' castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} />
-        <fog attach="fog" args={['#dfe9f5', 5, 15]} />
+        <fog attach="fog" args={['#dfe9f5', 0.1, 200]} />
 
         {tiles.map((tile: any) => {
           if (tile.type !== 4) {
@@ -499,8 +549,8 @@ const handleTouchEnd = () => {
         })}
         <BlockedArea blockedCenterX={blockedCenterX} blockedCenterY={blockedCenterY} blockedWidth={blockedWidth} blockedHeight={blockedHeight} />
 
-        <mesh ref={personRef} position={[centerX * 0.2, 0.25, centerY * 0.2]}>
-          <boxGeometry args={[0.2, 0.5, 0.2]} />
+        <mesh ref={personRef} position={[centerX * tileSize, 0, centerY * tileSize]}>
+          <boxGeometry args={[tileSize, 2, tileSize]} />
           <meshBasicMaterial color={0xffffff} />
         </mesh>
         
