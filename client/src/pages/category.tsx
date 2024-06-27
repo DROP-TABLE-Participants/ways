@@ -46,7 +46,7 @@ function Category() {
     }
 
     const updateCart = () => {
-        fetch(`https://ways-api.azurewebsites.net/api/product/?filter_category=${name}`)
+        fetch(`https://ways-api.azurewebsites.net/api/product?filter_category=${name}`)
             .then(response => response.json())
             .then(async (data: Product[]) => {
                 const productsInCart = await Promise.all(data.map(async (object) => await isProductInCart(object.id)));
