@@ -7,7 +7,8 @@ class ProductService:
     @staticmethod
     async def get_products(search: str = None, filter_category: str = None):
         if search and filter_category:
-            return await Product_Pydantic.from_queryset(Product.filter(name__icontains=search, category=filter_category))
+            return await Product_Pydantic.from_queryset(
+                Product.filter(name__icontains=search, category=filter_category))
         elif search:
             return await Product_Pydantic.from_queryset(Product.filter(name__icontains=search))
         elif filter_category:
@@ -32,3 +33,7 @@ class ProductService:
         categories = await Product.all().distinct().values('category')
 
         return [category['category'] for category in categories]
+
+    @staticmethod
+    async def get_product_by_id(product_id: int):
+        return await Product_Pydantic.from_queryset_single(Product.get(id=product_id))

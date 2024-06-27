@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
-import { Canvas, useFrame, useThree, extend } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 // import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
 import TWEEN from '@tweenjs/tween.js';
 // import tiles from './../assets/placement.json'
@@ -8,11 +8,9 @@ import { shaderMaterial } from '@react-three/drei';
 
 // extend({ CSS2DRenderer, CSS2DObject });
 
-const selectedProducts = [{ x: 27, y: 4, name: 'Borisi' }, { x: 33, y: 3, name: 'Atanasi' }, { x: 35, y: 20, name: 'Kalini' }];
-
-const calcDimensions = (tiles: Array<object>) => {
-  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-  let blockedMinX = Infinity, blockedMinY = Infinity, blockedMaxX = -Infinity, blockedMaxY = -Infinity;
+const calcDimensions = (tiles: Array<any>) => {
+  let minX: number = Infinity, minY: number = Infinity, maxX: number = -Infinity, maxY: number = -Infinity;
+  let blockedMinX: number = Infinity, blockedMinY: number = Infinity, blockedMaxX: number = -Infinity, blockedMaxY: number = -Infinity;
 
   tiles.forEach((tile) => {
     if (tile.x < minX) minX = tile.x;
@@ -97,7 +95,7 @@ const PulsingMaterial = shaderMaterial(
   `
 );
   
-const BlockedArea = ({ blockedCenterX, blockedCenterY, blockedWidth, blockedHeight }) => {
+const BlockedArea = ({ blockedCenterX, blockedCenterY, blockedWidth, blockedHeight }: any) => {
   const material = new THREE.ShaderMaterial({
     uniforms: {
       color: { value: new THREE.Color('#3b4d6b') },
@@ -127,14 +125,12 @@ const BlockedArea = ({ blockedCenterX, blockedCenterY, blockedWidth, blockedHeig
   </mesh>)
 };
 
-function Map ({tiles, selectedProducts}: {tiles: Array<object>, selectedProducts: Array<object>}) {
+function Map ({tiles, selectedProducts}: {tiles: Array<any>, selectedProducts: Array<any>}) {
   const { centerX, centerY, mapWidth, mapHeight, blockedWidth, blockedHeight, blockedCenterX, blockedCenterY } = calcDimensions(tiles);
   const initialDistance = Math.max(mapWidth, mapHeight) / 2 / Math.tan(THREE.MathUtils.degToRad(20));
   
-  const personRef = useRef();
-  const controlsRef = useRef();
-  const [activeCamera, setActiveCamera] = useState('tilted');
-  const [viewMode, setViewMode] = useState('tilted');
+  const personRef: any = useRef();
+  const controlsRef: any = useRef();
 
   const CAMERA_MODES = {
     TILTED: 'tilted',
@@ -143,15 +139,20 @@ function Map ({tiles, selectedProducts}: {tiles: Array<object>, selectedProducts
 
   const [cameraMode, setCameraMode] = useState(CAMERA_MODES.TILTED);
 
-  const ProductTile = ({ id, x, y, type }) => {
-    const ref = useRef();
-    const material = useRef();
+  const ProductTile = ({ x, y, type }: any) => {
+    const ref: any = useRef();
+    const material: any = useRef();
   
     // if (false) {
     //   material.current = new PulsingMaterial();
     // } else {
     //   material.current = new GradientMaterial();
     // }
+
+    useFrame(() => {
+        TWEEN.update();
+        updateCamera();
+      });
 
     if(selectedProducts) {
       if(selectedProducts.some(p => p.x == x && p.y == y)) {
@@ -198,13 +199,6 @@ function Map ({tiles, selectedProducts}: {tiles: Array<object>, selectedProducts
     }
   };
 
-  function Render() {
-      useFrame(() => {
-        TWEEN.update();
-        updateCamera();
-      });
-  }
-
   const Floor = () => {
     return (
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[centerX * 0.2, 0, centerY * 0.2]} receiveShadow>
@@ -214,7 +208,7 @@ function Map ({tiles, selectedProducts}: {tiles: Array<object>, selectedProducts
     );
   };
 
-  function CameraControls({ personRef, cameraMode}) {
+  function CameraControls({ personRef, cameraMode}: any) {
     const { camera, gl: { domElement } } = useThree();
     const touchStart = useRef({ x: 0, y: 0 });
     const mouseStart = useRef({ x: 0, y: 0 });
@@ -281,14 +275,14 @@ function Map ({tiles, selectedProducts}: {tiles: Array<object>, selectedProducts
       };
     }, [cameraMode])
 
-    const handleMouseDown = (event) => {
+    const handleMouseDown = (event: any) => {
       if (event.button === 0) { // Left button for rotation
         isDragging.current = true;
         mouseStart.current = { x: event.clientX, y: event.clientY };
       }
     };
 
-    const handleMouseMove = (event) => {
+    const handleMouseMove = (event: any) => {
       if (isDragging.current) {
         const deltaX = -(event.clientX - mouseStart.current.x) * rotationSensitivity; // Inverted the sign here
         const deltaY = -(event.clientY - mouseStart.current.y) * rotationSensitivity;
@@ -301,20 +295,20 @@ function Map ({tiles, selectedProducts}: {tiles: Array<object>, selectedProducts
       isDragging.current = false;
     };
 
-    const handleWheel = (event) => {
+    const handleWheel = (event: any) => {
       event.preventDefault();
       const delta = -event.deltaY * 0.005; // Normalize wheel to +1 or -1
       const zoomFactor = Math.exp(delta * zoomSensitivity * 50);
       setZoomVelocity(zoomFactor);
     };
 
-    const getTouchDistance = (event) => {
+    const getTouchDistance = (event: any) => {
       const dx = event.touches[0].clientX - event.touches[1].clientX;
       const dy = event.touches[0].clientY - event.touches[1].clientY;
       return Math.sqrt(dx * dx + dy * dy);
     };
 
-    const handleTouchStart = (event) => {
+    const handleTouchStart = (event: any) => {
       if (event.touches.length === 1) {
           if (cameraMode === CAMERA_MODES.TOP_DOWN  ) {
               panStart.current = { x: event.touches[0].clientX, y: event.touches[0].clientY };
@@ -335,7 +329,7 @@ function Map ({tiles, selectedProducts}: {tiles: Array<object>, selectedProducts
     };
 
 
-    const handleTouchMove = (event) => {
+    const handleTouchMove = (event: any) => {
       event.preventDefault();
       if (cameraMode === CAMERA_MODES.TOP_DOWN) {
           if (event.touches.length === 1 && !isZooming.current) {
@@ -492,14 +486,13 @@ const handleTouchEnd = () => {
       <Canvas camera={{ position: [centerX * 0.2 - 6, initialDistance / 3, centerY * 0.2] }} shadows="soft">
         <CameraControls personRef={personRef} cameraMode={cameraMode}/>
         <color attach="background" args={['#dfe9f5']} />
-        <Render/>
         <Floor />
         <ambientLight intensity={20} color='#eff5fb'/>
         <directionalLight position={[10, 20, 10]} intensity={1} color='#f2f5fa' castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} />
         <fog attach="fog" args={['#dfe9f5', 5, 15]} />
 
-        {tiles.map((tile) => {
-          if (tile.product_id !== 'BL') {
+        {tiles.map((tile: any) => {
+          if (tile.type !== 4) {
             return <ProductTile key={`${tile.x}-${tile.y}`} type={tile.type} x={tile.x} y={tile.y} />;
           }
           return null;
