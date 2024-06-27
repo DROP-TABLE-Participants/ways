@@ -26,6 +26,23 @@ function CartPanel() {
   const sheetState = useOverlayTriggerState({});
   const navigate = useNavigate();
   const [cartProducts, setCartProducts] = useState<CartProduct[]>([]);
+
+  const givePermissions = async () => {
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+            const orientationPermission = await DeviceOrientationEvent.requestPermission();
+            if (orientationPermission === 'granted') {
+
+            } else {
+                console.error('Permission for device orientation was denied');
+            }
+        } catch (error) {
+            console.error('Error requesting device orientation permission:', error);
+        }
+    } else {
+
+    }
+}
   const [busyHours, setBusyHours] = useState<string>('16:00 - 18:00');
 
   const fetchProductById = async (id: number): Promise<FetchProduct> => {
@@ -49,7 +66,7 @@ function CartPanel() {
         }
     })
       .then(response => response.json())
-        .then(async (data: CartProduct[]) => {
+        .then(async (data: CartProduct[]) => { 
           const products = await Promise.all(data.map(async (object) => {
             const product = await fetchProductById(object.product_id);
             return {
@@ -137,6 +154,7 @@ function CartPanel() {
               </div>
             </div>
             <div className="cart-call-to-action" onClick={() => {
+             givePermissions();
               sheetState.close();
               navigate('/navigation');
             }}>
