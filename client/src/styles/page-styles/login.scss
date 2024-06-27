@@ -1,6 +1,4 @@
-// Login.scss
-
-body {
+.login-container {
     font-family: Arial, sans-serif;
     background-color: #f0f2f5;
     display: flex;
@@ -8,62 +6,63 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-}
 
-.login-container {
-    background: #fff;
-    padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    max-width: 400px;
-    width: 100%;
-}
-
-h1 {
-    margin-bottom: 24px;
-    font-size: 24px;
-    color: #333;
-}
-
-.login-form {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-}
-
-.form-group {
-    margin-bottom: 20px;
-    text-align: left;
-}
-
-label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 14px;
-    color: #333;
-}
-
-input {
-    width: 92%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-}
-
-.login-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    background-color: #0000EC;
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-
-    &:hover {
-        background-color: #0000a8;
+    .login-content {
+        background: #fff;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        max-width: 400px;
+        width: 100%;
+        
+        h1 {
+            margin-bottom: 24px;
+            font-size: 24px;
+            color: #333;
+        }
+        
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        input {
+            width: 94%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .login-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #0000EC;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        
+            &:hover {
+                background-color: #0000a8;
+            }
+        }
+        
     }
 }
