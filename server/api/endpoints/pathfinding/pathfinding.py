@@ -12,11 +12,9 @@ pathfinding_endpoints = APIRouter()
 async def get_route(request: Request, response: Response, user_id: str = Depends(get_user_id)):
     cart = ["P206", "P207", "P243"]
 
-    path = get_path(cart)
+    path  = get_path(cart)
 
-    print(path)
-
-    return { "message": "kur" }
+    return { "path": path }
 
 
 

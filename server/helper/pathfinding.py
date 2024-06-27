@@ -1,21 +1,33 @@
 import time
 import itertools
-from typing import List, Tuple
+from typing import List
+import pickle
+
+from redis_client import redis_client
 
 from .astar import AStar
 
 
 def get_path(items: List[str]):
-    t0 = time.time()
     astar = AStar(items)
     paths = {}
 
     for node1, node2 in itertools.combinations(items + ["EN", "EX"], 2):
-        print("finding distance between", node1, node2)
-        distance, path = astar.search(astar.get_point(node1), astar.get_point(node2))
+        cached_path = redis_client.get(f"{node1}:{node2}")
 
-        paths[(node1, node2)] = [distance, path]
-        paths[(node2, node1)] = [distance, path[::-1]]
+        if not cached_path:
+            distance, path = astar.search(astar.get_point(node1), astar.get_point(node2))
+
+            paths[(node1, node2)] = [distance, path]
+            paths[(node2, node1)] = [distance, path[::-1]]
+
+            redis_client.set(f"{node1}:{node2}", pickle.dumps([distance, path]).decode("latin1"))
+            redis_client.set(f"{node2}:{node1}", pickle.dumps([distance, path[::-1]]).decode("latin1"))
+        else:
+            distance, path = pickle.loads(cached_path.encode("latin1"))
+
+            paths[(node1, node2)] = [distance, path]
+            paths[(node2, node1)] = [distance, path]
 
     distances = []
 
@@ -45,9 +57,4 @@ def get_path(items: List[str]):
 
         distances.append([dis, path])
 
-    t1 = time.time()
-
-    print(distances)
-
     return min(distances, key=lambda x: x[0])
-

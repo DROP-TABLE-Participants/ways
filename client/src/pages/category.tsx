@@ -33,7 +33,7 @@ function Category() {
             </button>
             <h1 className="category-heading">{name}</h1>
             <div className="product-list">
-                {products?.map((object, i) => <ProductCard name={object.name} imageUrl={object.imageUrl} key={i} quantity={object.quantity} price={Math.floor(Math.random() * 29) + 1} />)}
+                {products?.map((object, i) => <ProductCard name={object.name} imageUrl={object.imageUrl} index={i} key={i} quantity={object.quantity} price={Math.floor(Math.random() * 29) + 1} />)}
             </div>
             <CartPanel/>             
         </div>
