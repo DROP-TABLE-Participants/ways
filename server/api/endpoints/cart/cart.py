@@ -27,7 +27,7 @@ class CartItemEncoder(JSONEncoder):
         return super().default(o)
 
 
-@cart_endpoints.put("/")
+@cart_endpoints.put("/", response_model=list[CartItem])
 async def put_cart(request: Request, response: Response, cart: CartItem, user_id: str = Depends(get_user_id)):
     if cart.quantity < 1:
         return {"message": "Quantity must be greater than 0"}
@@ -57,7 +57,7 @@ async def put_cart(request: Request, response: Response, cart: CartItem, user_id
 
     response.set_cookie("cart", json.dumps(cart_cookie, cls=CartItemEncoder), samesite="none", secure=True)
 
-    return {"message": "Cart updated"}
+    return cart_cookie
 
 
 @cart_endpoints.delete("/")
@@ -79,3 +79,13 @@ async def delete_cart(request: Request, response: Response, cart: CartItem, user
     response.set_cookie("cart", json.dumps(cart_cookie, cls=CartItemEncoder), samesite="none", secure=True)
 
     return {"message": "Cart updated"}
+
+
+@cart_endpoints.get("/", response_model=list[CartItem])
+async def get_cart(request: Request, user_id: str = Depends(get_user_id)):
+    cart_cookie = request.cookies.get("cart")
+
+    if cart_cookie is None:
+        return []
+
+    return json.loads(cart_cookie)
