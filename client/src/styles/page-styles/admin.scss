@@ -17,6 +17,7 @@
         font-size: .9rem;
         margin-bottom: 5rem;
         color: #7d7d7d;
+        text-align: center;
     }
 
     .grid-container {
@@ -35,7 +36,7 @@
         }
     
         .tile {
-        background-color: lightblue;
+        background-color: #0000EC;
         }
     
         .empty {
@@ -48,7 +49,7 @@
         padding: 1rem 2rem;
         background-color: white;
         color: rgb(26, 26, 26);
-        border: 2px solid lightblue;
+        border: 2px solid #0000EC;
         border-radius: 10px;
         font-size: 1rem;
         font-weight: 600;

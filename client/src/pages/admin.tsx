@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/page-styles/admin.scss';
+import { useNavigate } from 'react-router-dom';
 
 function Admin() {
     const [tiles, setTiles] = useState<{ id: string, x: number, y: number }[]>([]);
     const [gridSize, setGridSize] = useState<{ rows: number, columns: number }>({ rows: 21, columns: 41 });
+    const [deleteOperations, setDeleteOperations] = useState<string[]>([]);
+    const [putOperations, setPutOperations] = useState<{ x: number, y: number, type: number }[]>([]);
+
+    const navigator = useNavigate();
 
     useEffect(() => {
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            navigator('/login');
+        }
+
         fetch(`https://ways-api.azurewebsites.net/api/tile`)
             .then(response => response.json())
             .then((data) => setTiles(data));
@@ -13,11 +22,42 @@ function Admin() {
 
     const handleDelete = (productId: string) => {
         setTiles(prevTiles => prevTiles.filter(tile => tile.id !== productId));
+        setDeleteOperations(prevDeleteOps => [...prevDeleteOps, productId]);
     };
 
     const handleAddWall = (x: number, y: number) => {
         const newTile = { id: `new-${x}-${y}`, x, y, type: 4 };
         setTiles(prevTiles => [...prevTiles, newTile]);
+        setPutOperations(prevPutOps => [...prevPutOps, { x, y, type: 4 }]);
+    };
+
+    const handleSaveChanges = () => {
+        // Send delete operations
+        deleteOperations.forEach(id => {
+            fetch(`https://ways-api.azurewebsites.net/api/tile/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+            });
+        });
+
+        // Send put operations
+        putOperations.forEach(tile => {
+            fetch(`https://ways-api.azurewebsites.net/api/tile`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(tile),
+                credentials: 'include',
+            });
+        });
+
+        // Clear the operations after sending
+        setDeleteOperations([]);
+        setPutOperations([]);
     };
 
     const renderGridItems = () => {
@@ -61,7 +101,7 @@ function Admin() {
             <div className="grid-container">
                 {renderGridItems()}
             </div>
-            <button onClick={() => console.log(tiles)} className="save-button">Запази промените</button>
+            <button onClick={handleSaveChanges} className="save-button">Запази промените</button>
         </div>
     );
 }
