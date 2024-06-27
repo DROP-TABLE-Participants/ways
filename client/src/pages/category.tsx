@@ -10,6 +10,7 @@ export type Product = {
     name: string;
     imageUrl: string;
     quantity: number;
+    category: string;
 }
 
 function Category() {
@@ -51,7 +52,8 @@ function Category() {
                     name: object.name,
                     imageUrl: categoryUrls[name!],
                     quantity: object.quantity,
-                    id: object.id
+                    id: object.id,
+                    category: object.category
                 })));
             })
             .catch(error => console.log(error));
@@ -77,7 +79,8 @@ function Category() {
             </button>
             <h1 className="category-heading">{name}</h1>
             <div className="product-list">
-                {products?.map((object, i) => <ProductCard
+                {products?.map((object, i) => 
+                    <ProductCard
                     name={object.name}
                     imageUrl={object.imageUrl}
                     key={i}

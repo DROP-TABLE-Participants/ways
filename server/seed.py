@@ -1,4 +1,5 @@
 import csv
+from random import randint
 
 from models.product import ProductIn_Pydantic
 from models.tile import TileIn_Pydantic, TileWithoutProductIn_Pydantic
@@ -20,10 +21,9 @@ class Seeder:
             reader = csv.reader(file)
 
             # Parse the CSV content into a list of dictionaries
-            products = [{'name': row[0], 'category': row[1], "quantity": 0} for row in reader]
+            products = [{'name': row[0], 'category': row[1], "price": randint(1, 30)} for row in reader]
 
         # Iterate over the list of dictionaries and create a new product in the database for each one
-        print(products)
         for product in products:
             product_in = ProductIn_Pydantic(**product)
             await ProductService.create_product(product_in)

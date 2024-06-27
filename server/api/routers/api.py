@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from api.routers.admin_auth import admin_auth_router
 from api.routers.cart import cart_router
 from api.routers.product import product_router
 from api.routers.session import session_router
@@ -13,3 +14,4 @@ apiRouter.include_router(tile_router)
 apiRouter.include_router(session_router)
 apiRouter.include_router(pathfinding_router)
 apiRouter.include_router(cart_router)
+apiRouter.include_router(admin_auth_router)

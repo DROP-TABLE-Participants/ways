@@ -10,3 +10,13 @@ class TileService:
     async def create_tile(tile: TileIn_Pydantic):
         tile_obj = await Tile.create(**tile.model_dump(exclude_unset=True))
         return await Tile_Pydantic.from_tortoise_orm(tile_obj)
+
+    @staticmethod
+    async def update_or_create_tile(tile: TileIn_Pydantic):
+        tile_obj, created = await Tile.get_or_create(**tile.model_dump(exclude_unset=True))
+        return await Tile_Pydantic.from_tortoise_orm(tile_obj)
+
+    @classmethod
+    async def delete_tile(cls, tile_id: int):
+        tile = await Tile.get(id=tile_id)
+        await tile.delete()
