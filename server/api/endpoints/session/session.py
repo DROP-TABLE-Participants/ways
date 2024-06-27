@@ -8,7 +8,7 @@ from services.auth_service import AuthService, get_user_id
 session_endpoints = APIRouter()
 
 
-@session_endpoints.post("/")
+@session_endpoints.post("")
 async def create_session():
     session = await AuthService.create_session()
 
@@ -24,7 +24,7 @@ async def whoami(user_id: str = Depends(get_user_id)):
     return {"userId": user_id}
 
 
-@session_endpoints.delete("/")
+@session_endpoints.delete("")
 async def del_session(response: Response, user_id: str = Depends(get_user_id)):
     await AuthService.delete_session(user_id)
     response.delete_cookie("token")

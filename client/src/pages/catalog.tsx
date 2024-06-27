@@ -29,7 +29,7 @@ function Catalog() {
                 <div className='content'>
                     <SearchBar onSearch={(query) => console.log(query)} />
                     <div className="product-list">
-                        {productCategories?.map((object, i) => <ProductCategoryCard name={object.name} imageUrl={object.imageUrl} index={i} key={i} onClick={() => {
+                        {productCategories?.map((object, i) => <ProductCategoryCard name={object.name} index={i} imageUrl={object.imageUrl} key={i} onClick={() => {
                             navigator(`/category/${object.name}`);
                         }}/>)}
                     </div>
