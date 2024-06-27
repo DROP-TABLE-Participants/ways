@@ -16,31 +16,13 @@ function Category() {
     const { name } = useParams();
     const [products, setProducts] = useState<Product[]>([]);
     const [inCart, setInCart] = useState<boolean[]>([]);
-    const [quantities, setQuantities] = useState<number[]>([]); 
+    const [quantities, setQuantities] = useState<(number | undefined)[]>([]);
     const navigator = useNavigate();
 
-    const isProductInCart = async (id: number) => {
-        const res = await fetch('https://ways-api.azurewebsites.net/api/cart', {
-            credentials: 'include',
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        const data = await res.json();
+    const isProductInCart = async (data: {product_id: number, quantity: number}[], id: number )=> {
         return data.some((object: {product_id: number, quantity: number}) => object.product_id === id);
     }
-    const getProductQuantity = async (id: number) => {
-        const res = await fetch('https://ways-api.azurewebsites.net/api/cart', {
-            credentials: 'include',
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        const data = await res.json();
+    const getProductQuantity = async (data: {product_id: number, quantity: number}[], id: number) => {
         const product = data.find((object: {product_id: number, quantity: number}) => object.product_id === id);
         return product?.quantity;
     }
@@ -49,9 +31,20 @@ function Category() {
         fetch(`https://ways-api.azurewebsites.net/api/product?filter_category=${name}`)
             .then(response => response.json())
             .then(async (data: Product[]) => {
-                const productsInCart = await Promise.all(data.map(async (object) => await isProductInCart(object.id)));
-                const quantities = await Promise.all(data.map(async (object) => await getProductQuantity(object.id)));
-                
+
+                const res = await fetch('https://ways-api.azurewebsites.net/api/cart', {
+                    credentials: 'include',
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const resData: {product_id: number, quantity: number}[] = await res.json();
+
+                const productsInCart = await Promise.all(data.map(async (object) => await isProductInCart(resData, object.id)));
+                const quantities = await Promise.all(data.map(async (object) => await getProductQuantity(resData, object.id)));
+
                 setInCart(productsInCart);
                 setQuantities(quantities);
                 setProducts(data.map((object) => ({
@@ -63,19 +56,16 @@ function Category() {
             })
             .catch(error => console.log(error));
     }
-        
     
     useEffect(() => {
         updateCart();
-        
+
         document.addEventListener('cartUpdate', updateCart);
-        
+
         return () => {
             document.removeEventListener('cartUpdate', updateCart);
         }
     }, [])
-    
-    
 
     return (
         <div className="container">
