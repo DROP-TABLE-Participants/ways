@@ -34,7 +34,7 @@ function StoreNavigation() {
       credentials: 'include'
     })
         .then(response => response.json())
-        .then((data) => {setPath(data.path[1])});
+        .then((data) => {setPath(data.path)});
   }, [])
 
   let selected_products = [{x:'27', y:'4', name: 'Borisi'}, {x:'33', y:'3', name: 'Atanasi'}, {x:'35', y:'20', name: 'Kalini'}]
@@ -43,7 +43,7 @@ function StoreNavigation() {
     <div className="content-container">
       
       <div className="map-container">
-        <Map tiles={tiles} selectedProducts={selected_products} path={path}/>
+        <Map tiles={tiles} selectedProducts={selected_products} path={path.length <= 0 ? [[0, 0]] : path}/>
       </div>
 
 

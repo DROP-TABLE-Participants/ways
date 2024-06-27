@@ -1,11 +1,12 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import * as THREE from 'three';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useThree, extend } from '@react-three/fiber';
 // import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
 import TWEEN from '@tweenjs/tween.js';
 // import tiles from './../assets/placement.json'
 import { Line, shaderMaterial } from '@react-three/drei';
-import { LineGeometry, LineMaterial } from 'three/examples/jsm/Addons.js';
+import { LineGeometry, LineMaterial, VerticalTiltShiftShader } from 'three/examples/jsm/Addons.js';
+
 
 // extend({ CSS2DRenderer, CSS2DObject });
 
@@ -132,46 +133,54 @@ const BlockedArea = ({ blockedCenterX, blockedCenterY, blockedWidth, blockedHeig
   </mesh>)
 };
 
-const Path = ({ points }) => {
-  const material = new LineMaterial({
-    color: 0x0000ff, // Blue as a base color
-    linewidth: 0.002, // Width of the line, adjust as needed
-    vertexColors: true
-  });
+const PathShaderMaterial = shaderMaterial(
+  { time: 0, color: new THREE.Color(0x0000ff) },
+  `precision mediump float;
+  varying vec2 vUv;
 
-  const vertices: any = [];
-  const lineDistances: any = [];
-  let totalDistance = 0;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }`,
+  `precision mediump float;
+  uniform float time;
+  uniform vec3 color;
+  varying vec2 vUv;
 
-  points.forEach((point, i) => {
-      vertices.push(point[1], 0, point[0]); // Assuming y is up axis
-      if (i > 0) {
-          totalDistance += new THREE.Vector3(point[1], 0, point[0]).distanceTo(new THREE.Vector3(points[i - 1][1], 0, points[i - 1][0]));
-      }
-      lineDistances.push(totalDistance);
-  });
+  void main() {
+    float stripe = sin(vUv.x * 10.0 + time * 2.0);
+    gl_FragColor = mix(vec4(color, 1.0), vec4(0.5, 0.7, 1.0, 1.0), stripe);
+  }`
+);
 
-  const geometry = new LineGeometry();
-  geometry.setPositions(vertices);
+// Extend the drei components to use this new material
+extend({ PathShaderMaterial });
 
-  // Update the time uniform in the material
+function Path({ points }) {
+  const shaderRef = useRef();
+
+  let vertices: Array<THREE.Vector3> = [];
+  points.forEach((point)=>{
+    vertices.push(new THREE.Vector3(point[1], 0.1, point[0]))
+  })
+
+  // Update shader uniforms
   useFrame(({ clock }) => {
-    const time = clock.getElapsedTime();
-    const colors = [];
-
-    for (let i = 0; i < vertices.length; i += 3) {
-        const pulse = (Math.sin(time + vertices[i] * 0.5) + 1) / 2;
-        colors.push(0, 0, 1 - pulse); // Creating a blue gradient with a pulsing effect
+    if (shaderRef.current) {
+      shaderRef.current.uniforms.time.value = clock.getElapsedTime();
     }
-
-    geometry.setColors(colors);
-    material.uniformsNeedUpdate = true; // Ensure the material updates with the animation
   });
 
   return (
-      <Line geometry={geometry} material={material} points={vertices} />
+    <Line
+      points={vertices} // Pass points directly
+      color="blue"
+      lineWidth={10} // Set the thickness of the line
+      material={shaderRef} // Use the custom shader
+    />
   );
 }
+
 
 function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProducts: Array<any>, path: Array<any>}) {
   const { centerX, centerY, mapWidth, mapHeight, blockedWidth, blockedHeight, blockedCenterX, blockedCenterY } = calcDimensions(tiles);
@@ -185,6 +194,8 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
     TILTED: 'tilted',
     TOP_DOWN: 'topdown'
   };
+
+  console.log(tiles)
 
   const [cameraMode, setCameraMode] = useState(CAMERA_MODES.TILTED);
 
