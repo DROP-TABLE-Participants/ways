@@ -6,6 +6,7 @@ import './../styles/component-styles/cart-panel.scss';
 import {A11ySheet} from './a11-sheet';
 import {useEffect, useState} from "react";
 import categoryUrls from "../assets/category-urls.tsx";
+import busyHoursData from '../assets/busy-hours.json';
 
 type FetchProduct = {
     id: number;
@@ -25,17 +26,18 @@ function CartPanel() {
   const sheetState = useOverlayTriggerState({});
   const navigate = useNavigate();
   const [cartProducts, setCartProducts] = useState<CartProduct[]>([]);
+  const [busyHours, setBusyHours] = useState<string>('16:00 - 18:00');
 
-  const fetchProdyctById = async (id: number): Promise<FetchProduct> => {
+  const fetchProductById = async (id: number): Promise<FetchProduct> => {
     const res = await fetch(`https://ways-api.azurewebsites.net/api/product/${id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        },
-        credentials: 'include',
+      },
+      credentials: 'include',
     });
     
-  return await res.json();
+    return await res.json();
   }
   
   const fetchCartProducts = () => {
@@ -49,7 +51,7 @@ function CartPanel() {
       .then(response => response.json())
         .then(async (data: CartProduct[]) => {
           const products = await Promise.all(data.map(async (object) => {
-            const product = await fetchProdyctById(object.product_id);
+            const product = await fetchProductById(object.product_id);
             return {
               product_id: object.product_id,
               quantity: object.quantity,
@@ -67,6 +69,7 @@ function CartPanel() {
 
   useEffect(() => {
     fetchCartProducts();
+    fetchBusyHours();
     
     document.addEventListener('cartUpdate', fetchCartProducts);
     
@@ -75,6 +78,26 @@ function CartPanel() {
     }
   }, []);
   
+  const calculateTotalPrice = () => {
+    return cartProducts.reduce((total, object) => total + object.product.price * object.quantity, 0);
+  }
+
+  const calculateEstimatedTime = () => {
+    const uniqueProductCount = cartProducts.length * 2;
+    return uniqueProductCount;
+  }
+  
+  const fetchBusyHours = () => {
+    const currentDay = new Date().toLocaleString('en-us', { weekday: 'long' });
+    const busyHour: { day: string, hours: string } | undefined = busyHoursData.busy_hours.find((bh: { day: string }) => bh.day === currentDay);
+    if (busyHour) {
+      setBusyHours(busyHour.hours);
+    }
+  }
+
+  const totalPrice = calculateTotalPrice();
+  const estimatedTime = calculateEstimatedTime();
+
   return (
     <>
       <div className="cart-button" onClick={openSheet}>
@@ -102,15 +125,15 @@ function CartPanel() {
               <div className="horizontal-line"></div>
               <div className="cart-product-sum-text">
                 <p>Обща сума:</p>
-                <p>100 лв.</p>
+                <p>{totalPrice.toFixed(2)} лв.</p>
               </div>
               <div className="cart-product-sum-text">
                 <p>Прогнозирано време:</p>
-                <p>06:20 минути</p>
+                <p>{estimatedTime} минути</p>
               </div>
               <div className="cart-product-sum-text">
                 <p>Най-заети часове:</p>
-                <p>16:00 - 18:00</p>
+                <p>{busyHours}</p>
               </div>
             </div>
             <div className="cart-call-to-action" onClick={() => {
