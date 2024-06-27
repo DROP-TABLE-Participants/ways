@@ -26,7 +26,7 @@ function CartPanel() {
   const [cartProducts, setCartProducts] = useState<CartProduct[]>([]);
 
   const fetchProdyctById = async (id: number): Promise<FetchProduct> => {
-    const res = await fetch(`http://localhost:4000/api/product/${id}`, {
+    const res = await fetch(`https://ways-api.azurewebsites.net/api/product/${id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ function CartPanel() {
   }
   
   const fetchCartProducts = () => {
-    fetch('http://localhost:4000/api/cart', {
+    fetch('https://ways-api.azurewebsites.net/api/cart', {
         credentials: 'include',
         method: 'GET',
         headers: {

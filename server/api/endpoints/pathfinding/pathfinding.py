@@ -8,7 +8,7 @@ from helper.pathfinding import get_path
 pathfinding_endpoints = APIRouter()
 
 
-@pathfinding_endpoints.get("/")
+@pathfinding_endpoints.get("")
 async def get_route(request: Request, response: Response, user_id: str = Depends(get_user_id)):
     cart = ["P206", "P207", "P243"]
 

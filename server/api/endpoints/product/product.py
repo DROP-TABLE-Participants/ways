@@ -8,7 +8,7 @@ from services.product_service import ProductService
 product_endpoints = APIRouter()
 
 
-@product_endpoints.get("/", response_model=List[Product_Pydantic])
+@product_endpoints.get("", response_model=List[Product_Pydantic])
 async def get_products(search: str = None, filter_category: str = None):
     return await ProductService.get_products(search, filter_category)
 
@@ -27,7 +27,7 @@ async def get_product_by_id(product_id: int):
 
 
 """
-@product_endpoints.post("/", response_model=Product_Pydantic)
+@product_endpoints.post("", response_model=Product_Pydantic)
 async def create_product(product: ProductIn_Pydantic):
     product_obj = await Product.create(**product.model_dump(exclude_unset=True))
     return await Product_Pydantic.from_tortoise_orm(product_obj)

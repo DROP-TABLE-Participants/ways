@@ -3,7 +3,7 @@ import App from './App.tsx'
 import './index.css'
 
 const getSession = async () => {
-    let response = await fetch('http://localhost:4000/api/session/', {
+    let response = await fetch('https://ways-api.azurewebsites.net/api/session', {
         credentials: 'include',
          method: 'POST',
         headers: {

@@ -20,7 +20,7 @@ function Category() {
     const navigator = useNavigate();
 
     const isProductInCart = async (id: number) => {
-        const res = await fetch('http://localhost:4000/api/cart', {
+        const res = await fetch('https://ways-api.azurewebsites.net/api/cart', {
             credentials: 'include',
             method: 'GET',
             headers: {
@@ -32,7 +32,7 @@ function Category() {
         return data.some((object: {product_id: number, quantity: number}) => object.product_id === id);
     }
     const getProductQuantity = async (id: number) => {
-        const res = await fetch('http://localhost:4000/api/cart', {
+        const res = await fetch('https://ways-api.azurewebsites.net/api/cart', {
             credentials: 'include',
             method: 'GET',
             headers: {

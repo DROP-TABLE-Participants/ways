@@ -27,7 +27,7 @@ class CartItemEncoder(JSONEncoder):
         return super().default(o)
 
 
-@cart_endpoints.put("/", response_model=list[CartItem])
+@cart_endpoints.put("", response_model=list[CartItem])
 async def put_cart(request: Request, response: Response, cart: CartItem, user_id: str = Depends(get_user_id)):
     if cart.quantity < 1:
         return {"message": "Quantity must be greater than 0"}
@@ -60,7 +60,7 @@ async def put_cart(request: Request, response: Response, cart: CartItem, user_id
     return cart_cookie
 
 
-@cart_endpoints.delete("/")
+@cart_endpoints.delete("")
 async def delete_cart(request: Request, response: Response, cart: CartItem, user_id: str = Depends(get_user_id)):
     cart_cookie = request.cookies.get("cart")
 
@@ -81,7 +81,7 @@ async def delete_cart(request: Request, response: Response, cart: CartItem, user
     return {"message": "Cart updated"}
 
 
-@cart_endpoints.get("/", response_model=list[CartItem])
+@cart_endpoints.get("", response_model=list[CartItem])
 async def get_cart(request: Request, user_id: str = Depends(get_user_id)):
     cart_cookie = request.cookies.get("cart")
 
