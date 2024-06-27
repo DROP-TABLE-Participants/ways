@@ -31,6 +31,13 @@ async def get_route(request: Request, response: Response, user_id: str = Depends
 
     path = await get_path(items)
 
+    products_raw = path[2]
+    products = []
+
+    # for product in products_raw:
+    #     product_obj = await ProductService.get_product_by_id(product)
+    #     products.append(product_obj)
+
     return {"path": path[1], "distance": path[0], "products": path[2]}
 
 

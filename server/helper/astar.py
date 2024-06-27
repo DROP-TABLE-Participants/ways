@@ -31,9 +31,31 @@ class AStar:
                 self.maze[tile.y][tile.x] = tile.product.legacy_product_id
             else:
                 if tile.type in [TileType.SELF_CHECKOUT, TileType.CARD_ONLY_SELF_CHECKOUT]:
-                    self.maze[tile.y][tile.x] = "SC"
+                    # self.maze[tile.y][tile.x] = f"S{}"
+                    if tile.x == 3:
+                        if tile.y == 14:
+                            multiplier = 3
+                        else:
+                            multiplier = 1
+                    else:
+                        if tile.y == 16:
+                            multiplier = 2
+                        else:
+                            multiplier = 4
+                    self.maze[tile.y][tile.x] = f"S{multiplier}"
                 elif tile.type == TileType.CASH_REGISTER:
-                    self.maze[tile.y][tile.x] = "CA"
+                    if tile.x == 3:
+                        if tile.y == 18:
+                            multiplier = 2
+                        else:
+                            multiplier = 1
+                    else:
+                        if tile.y == 18:
+                            multiplier = 3
+                        else:
+                            multiplier = 4
+
+                    self.maze[tile.y][tile.x] = f"CA{multiplier}"
                 elif tile.type == TileType.WALL:
                     self.maze[tile.y][tile.x] = "BL"
                 # TODO: Add Easter Egg
