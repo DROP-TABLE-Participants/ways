@@ -40,7 +40,7 @@ async def lifespan(app: FastAPI):
                    f"{os.getenv('DB_HOST')}:"
                    f"{os.getenv('DB_PORT')}/"
                    f"{os.getenv('DB_NAME')}",
-            modules={"models": ["models.product", "models.tile", "models.session", "aerich.models"]},
+            modules={"models": ["models.product", "models.tile", "models.session", "models.admin_session", "aerich.models"]},
             generate_schemas=True,
             add_exception_handlers=True,
     ):

@@ -1,26 +1,24 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import '../styles/component-styles/search-bar.scss';
+import {useDebounce} from "use-debounce";
 
 interface SearchBarProps {
     onSearch: (query: string) => void;
+    query: string;
 }
 
-function SearchBar( onSearch: SearchBarProps ) {
-    const [query, setQuery] = useState('');
+function SearchBar( props: SearchBarProps ) {
+    const [query, setQuery] = useState(props.query);
+    const [value] = useDebounce(query, 500);
 
+    useEffect(() => {
+        props.onSearch(value);
+    }, [props, value]);
+    
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setQuery(event.target.value);
     };
-
-    const handleSearch = () => {
-        onSearch.onSearch(query);
-    };
-
-    const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter') {
-            handleSearch();
-        }
-    };
+    
 
     return (
         <div className="search-container">
@@ -30,7 +28,6 @@ function SearchBar( onSearch: SearchBarProps ) {
             onChange={handleInputChange}
             className="search-input"
             placeholder="Яйца, мляко, хляб..."
-            onKeyDown={handleKeyPress}
         />
         </div>
     );
