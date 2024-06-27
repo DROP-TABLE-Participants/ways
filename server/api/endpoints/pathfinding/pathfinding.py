@@ -1,18 +1,35 @@
+import json
+
 from fastapi import APIRouter, Depends, Request
 from starlette.responses import Response
 
 from services.auth_service import get_user_id
+from services.product_service import ProductService
 from helper.pathfinding import get_path
+
 
 
 pathfinding_endpoints = APIRouter()
 
 
-@pathfinding_endpoints.get("")
+@pathfinding_endpoints.get("/")
 async def get_route(request: Request, response: Response, user_id: str = Depends(get_user_id)):
-    cart = ["P206", "P207", "P243", "P180", "P197", "P202"]
+    cart = request.cookies.get("cart")
 
-    path = await get_path(cart)
+    if cart is None:
+        return {"message": "Cart is empty"}
+
+    parsed_cart = json.loads(cart)
+    items = []
+
+    for item in parsed_cart:
+        product_id = item["product_id"]
+        product = await ProductService.get_product_by_id(product_id)
+
+        if product:
+            items.append(product.legacy_product_id)
+
+    path = await get_path(items)
 
     return {"path": path[1], "distance": path[0], "products": path[2]}
 

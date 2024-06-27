@@ -16,18 +16,36 @@ class AStar:
         self.start_node = None
         self.end_node = None
 
-        self.good_points = [TileType.CLEAR, TileType.ENTER, TileType.EXIT, TileType.PRODUCT]
+        self.good_points = [0, "EX", "EN"]
         self.good_points.extend(good_points)
 
     async def init_maze(self):
         self.maze = [
-            [[8] for i in range(41)] for k in range(21)
+            [0 for i in range(41)] for k in range(21)
         ]
 
         tiles = await TileService.get_tiles()
 
         for tile in tiles:
-            print(tile)
+            if tile.product:
+                self.maze[tile.y][tile.x] = tile.product.legacy_product_id
+            else:
+                if tile.type in [TileType.SELF_CHECKOUT, TileType.CARD_ONLY_SELF_CHECKOUT]:
+                    self.maze[tile.y][tile.x] = "SC"
+                elif tile.type == TileType.CASH_REGISTER:
+                    self.maze[tile.y][tile.x] = "CA"
+                elif tile.type == TileType.WALL:
+                    self.maze[tile.y][tile.x] = "BL"
+                # TODO: Add Easter Egg
+                # elif tile.tile_type == TileType.EASTER_EGG:
+                #     self.maze[tile.x][tile.y] = "EE"
+                elif tile.type == TileType.ENTER:
+                    self.maze[tile.y][tile.x] = "EN"
+                elif tile.type == TileType.EXIT:
+                    self.maze[tile.y][tile.x] = "EX"
+
+        print(self.maze)
+
 
     def heuristic(self, node1, node2):
         return abs(node1.x - node2.x) + abs(node1.y - node2.y)
