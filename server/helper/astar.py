@@ -31,7 +31,6 @@ class AStar:
                 self.maze[tile.y][tile.x] = tile.product.legacy_product_id
             else:
                 if tile.type in [TileType.SELF_CHECKOUT, TileType.CARD_ONLY_SELF_CHECKOUT]:
-                    # self.maze[tile.y][tile.x] = f"S{}"
                     if tile.x == 3:
                         if tile.y == 14:
                             multiplier = 3
@@ -68,6 +67,11 @@ class AStar:
 
         print(self.maze)
 
+    def add_point(self, point):
+        self.good_points.append(point)
+
+    def remove_point(self, point):
+        self.good_points.remove(point)
 
     def heuristic(self, node1, node2):
         return abs(node1.x - node2.x) + abs(node1.y - node2.y)
@@ -76,12 +80,21 @@ class AStar:
         neighbors = []
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
         old_node = self.maze[node.x][node.y]
+
         for direction in directions:
             new_x, new_y = node.x + direction[0], node.y + direction[1]
-            new_node = self.maze[new_x][new_y]
+
             if 0 <= new_x < len(self.maze) and 0 <= new_y < len(self.maze[0]):
-                if new_node in self.good_points and not (str(old_node).startswith("P") and str(new_node).startswith("P")):
+                new_node = self.maze[new_x][new_y]
+
+                is_good_point = new_node in self.good_points
+                is_not_point_to_point = not (str(old_node).startswith("P") and str(new_node).startswith("P"))
+                is_not_register_to_register = not ((str(old_node).startswith("S") or str(old_node).startswith("C")) and
+                                                   (str(new_node).startswith("S") or str(new_node).startswith("C")))
+
+                if is_good_point and is_not_point_to_point and is_not_register_to_register:
                     neighbors.append(Node(new_x, new_y))
+
         return neighbors
 
     def reconstruct_path(self, end_node):
@@ -96,11 +109,13 @@ class AStar:
         for i in range(len(self.maze)):
             for k in range(len(self.maze[0])):
                 if self.maze[i][k] == point:
+                    print(i, k)
                     return (i, k)
 
     def search(self, start, end):
         self.start_node = Node(start[0], start[1])
         self.end_node = Node(end[0], end[1])
+
         self.open_list = []
         self.closed_list = set()
 
@@ -135,5 +150,3 @@ class AStar:
                         open_neighbor.parent = current_node
 
         return None
-
-
