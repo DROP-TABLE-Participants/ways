@@ -54,6 +54,10 @@
     .product-card-icon-star {
         display: none;
     }
+
+    .product-card-icon-checkout {
+        display: none;
+    }
   }
   
   .product-card-next {
@@ -106,5 +110,37 @@
         display: flex;
         align-items: center;
         justify-content: center;
+    }
+  }
+
+  .product-card-checkout {
+    border: 1px solid #4040da;
+    height: 9vh;
+    
+    .product-card-image {
+      display: none;
+    }
+
+    .product-card-name {
+      font-size: 20px !important;
+    }
+
+    .product-card-icon-checkout {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+    }
+
+    .quantity-number {
+      display: none;
+    }
+
+    .product-card-price {
+      display: none;
+    }
+
+    .product-card-quantity {
+      display: none;
     }
   }

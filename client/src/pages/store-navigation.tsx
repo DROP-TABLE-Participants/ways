@@ -10,8 +10,8 @@ function StoreNavigation() {
   const [availableItems] = useState([
     { name: "Банани", quantity: 2, imageUrl: tempImageUrl, price: 10, isNext: false, isAcquired: false, isGoldenEgg: false, isCheckout: false },
     { name: "Атанани", quantity: 3, imageUrl: tempImageUrl, price: 15, isNext: false, isAcquired: false, isGoldenEgg: true, isCheckout: false },
-    { name: "Борани", quantity: 3, imageUrl: tempImageUrl, price: 15, isNext: false, isAcquired: false, isGoldenEgg: false, isCheckout: false }
-
+    { name: "Борани", quantity: 3, imageUrl: tempImageUrl, price: 15, isNext: false, isAcquired: false, isGoldenEgg: false, isCheckout: false },
+    { name: "Каса Илко", quantity: 3, imageUrl: tempImageUrl, price: 15, isNext: false, isAcquired: false, isGoldenEgg: false, isCheckout: false }
   ]);
   const [acquiredItems] = useState([
     { name: "Калани", quantity: 2, imageUrl: tempImageUrl, price: 10, isNext: false, isAcquired: true, isGoldenEgg: false, isCheckout: false },
@@ -62,7 +62,7 @@ function StoreNavigation() {
                     isNext={i === 0}
                     isAcquired={false}
                     isGoldenEgg={availableItems[i].isGoldenEgg}
-                    isCheckout={false}
+                    isCheckout={i === availableItems.length - 1}
                     key={i}
                     />
                 ))}

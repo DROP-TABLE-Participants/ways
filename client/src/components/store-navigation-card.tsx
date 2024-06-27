@@ -1,6 +1,7 @@
 import '../styles/component-styles/store-navigation-card.scss';
 import CheckmarkIcon from '../components/icons/checkmark-icon';
 import StarkIcon from '../components/icons/star-icon';
+import CheckoutIcon from './icons/checkout-icon';
 
 
 interface StoreNavigationCardProps {
@@ -29,6 +30,10 @@ function StoreNavigationCard (props: StoreNavigationCardProps) {
     if (props.isGoldenEgg) {
         cardClassName += " product-card-golden-egg";
     }
+
+    if (props.isCheckout) {
+        cardClassName += " product-card-checkout";
+    }
     return (
         <div className={"product-card " + cardClassName}>
             <img src={props.imageUrl} alt={props.name} className="product-card-image" />
@@ -44,6 +49,9 @@ function StoreNavigationCard (props: StoreNavigationCardProps) {
             </div>
             <div className="product-card-icon-star">
                 <StarkIcon />
+            </div>
+            <div className="product-card-icon-checkout">
+                <CheckoutIcon/>
             </div>
         </div>
     );
