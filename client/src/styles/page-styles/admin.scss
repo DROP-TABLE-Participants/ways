@@ -7,6 +7,41 @@
     flex-direction: column;
     background-color: #f5f5f5;
 
+    .legend {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+            margin-bottom: 10px;
+    
+            .legend-color {
+                width: 20px;
+                height: 20px;
+                margin-right: 10px;
+            }
+    
+            .legend-tile {
+                width: 20px;
+                height: 20px;
+                margin-right: 10px;
+            }
+        }
+    }
+    
+    .grid-item.product { background-color: #0000EC; }
+    .grid-item.self-checkout { background-color: #fdbf6d; }
+    .grid-item.card-only-self-checkout { background-color: #5dffc9; }
+    .grid-item.cash-register { background-color: #f09c15; }
+    .grid-item.wall { background-color: #272727; }
+    .grid-item.easter-egg { background-color: #e5d018; }
+    .grid-item.enter { background-color: #4CAF50; }
+    .grid-item.exit { background-color: #F44336; }
+    
+
     h1 {
         font-size: 2rem;
         margin-bottom: 1rem;
@@ -27,7 +62,8 @@
         gap: 5px;
         
         .grid-item {
-        border: 1px solid #000;
+        border: 1px solid #ddd;
+        &.empty { background-color: #fff; cursor: pointer; }
         text-align: center;
         cursor: pointer;
         display: flex;
@@ -36,8 +72,16 @@
         }
     
         .tile {
-        background-color: #0000EC;
+            &.product { background-color: #0000EC; }
+            &.self-checkout { background-color: #fdbf6d; }
+            &.card-only-self-checkout { background-color: #5dffc9; }
+            &.cash-register { background-color: #f09c15; }
+            &.wall { background-color: #272727; }
+            &.easter-egg { background-color: #e5d018; }
+            &.enter { background-color: #32cd32; }
+            &.exit { background-color: #ff4500; }
         }
+        
     
         .empty {
         background-color: white;
@@ -50,6 +94,23 @@
         background-color: white;
         color: rgb(26, 26, 26);
         border: 2px solid #0000EC;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all .3s;
+
+        &:hover {
+            background-color: rgb(234, 234, 234);
+        }
+    }
+
+    .logout-button {
+        margin-top: 2rem;
+        padding: 1rem 2rem;
+        background-color: white;
+        color: rgb(26, 26, 26);
+        border: 2px solid #6d6d6d;
         border-radius: 10px;
         font-size: 1rem;
         font-weight: 600;

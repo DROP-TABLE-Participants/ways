@@ -15,7 +15,9 @@ const getSession = async () => {
     console.log(response)
 }
 
-await getSession()
+if (localStorage.getItem('isLoggedIn') !== 'true') {
+    await getSession()
+}
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <>

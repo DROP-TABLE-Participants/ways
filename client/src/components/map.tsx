@@ -3,12 +3,8 @@ import * as THREE from 'three';
 import { Canvas, useFrame, useThree, extend } from '@react-three/fiber';
 // import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
 import TWEEN from '@tweenjs/tween.js';
-// import tiles from './../assets/placement.json'
 import { Line, shaderMaterial } from '@react-three/drei';
-import { LineGeometry, LineMaterial, VerticalTiltShiftShader } from 'three/examples/jsm/Addons.js';
-
-
-// extend({ CSS2DRenderer, CSS2DObject });
+import useDeviceOrientation from '../hooks/DeviceOrientation';
 
 const tileSize = 1; // Global tile size variable
 
@@ -156,20 +152,24 @@ const PathShaderMaterial = shaderMaterial(
 // Extend the drei components to use this new material
 extend({ PathShaderMaterial });
 
-function Path({ points }) {
+function Path({ points }: {points: any}) {
   const shaderRef = useRef();
-
-  let vertices: Array<THREE.Vector3> = [];
-  points.forEach((point)=>{
-    vertices.push(new THREE.Vector3(point[1], 0.1, point[0]))
-  })
-
+  
   // Update shader uniforms
   useFrame(({ clock }) => {
     if (shaderRef.current) {
       shaderRef.current.uniforms.time.value = clock.getElapsedTime();
     }
   });
+
+  if(points == null) return null;
+
+
+  let vertices: Array<THREE.Vector3> = [];
+  points.forEach((point)=>{
+    vertices.push(new THREE.Vector3(point[1], 0.1, point[0]))
+  })
+
 
   return (
     <Line
@@ -182,7 +182,7 @@ function Path({ points }) {
 }
 
 
-function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProducts: Array<any>, path: Array<any>}) {
+function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProducts: Array<any>, path: Array<any> | null}) {
   const { centerX, centerY, mapWidth, mapHeight, blockedWidth, blockedHeight, blockedCenterX, blockedCenterY } = calcDimensions(tiles);
   const initialDistance = (Math.max(mapWidth, mapHeight) * 2) / Math.tan(THREE.MathUtils.degToRad(45));
   const cameraPosition: any = [centerX * tileSize, initialDistance, centerY * tileSize];
@@ -194,8 +194,6 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
     TILTED: 'tilted',
     TOP_DOWN: 'topdown'
   };
-
-  console.log(tiles)
 
   const [cameraMode, setCameraMode] = useState(CAMERA_MODES.TILTED);
 
@@ -269,6 +267,11 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
   };
 
   function CameraControls({ personRef, cameraMode}: any) {
+    const compassHeading = useDeviceOrientation();
+    const lastHeading = useRef(compassHeading);
+    const lastTheta = useRef(0); // To store last frame's theta
+    const rotationalVelocity = useRef(0); // Rotational velocity
+
     const { camera, gl: { domElement } } = useThree();
     const touchStart = useRef({ x: 0, y: 0 });
     const mouseStart = useRef({ x: 0, y: 0 });
@@ -299,30 +302,44 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
     };
 
     const setTopDownView = () => {
+      // Adjust only the Y coordinate for the height, keep X and Z the same
       const topDownPosition = new THREE.Vector3(
-        personRef.current.position.x,
-        10, // height from the top to adequately cover the area
-        personRef.current.position.z
+          camera.position.x, // Preserve current X
+          10, // Height from the top to adequately cover the area
+          camera.position.z  // Preserve current Z
       );
-      camera.position.copy(topDownPosition); // Use copy instead of lerp for immediate placement
-      camera.lookAt(new THREE.Vector3(personRef.current.position.x, personRef.current.position.y, personRef.current.position.z)); // Ensure the camera is looking straight down
-      camera.up.set(0, 0, -1); // Correct the camera's up vector to ensure correct orientation
-    };
+      camera.position.copy(topDownPosition);
+      camera.lookAt(personRef.current.position);
+      camera.up.set(0, 1, 0); // Set up vector to default for proper orientation
+  };
   
     // This function adjusts camera position for tilted view
     const setTiltedView = () => {
-      const offset = new THREE.Vector3(0, 10, -13); // Offset for the tilted view
-      const tiltedPosition = personRef.current.position.clone().add(offset);
+      // Calculate the new position maintaining the current horizontal angle
+      const offset = new THREE.Vector3(0, 10, -13); // Vertical offset for the tilted view
+      const direction = new THREE.Vector3().subVectors(camera.position, personRef.current.position).normalize();
+      const horizontalDistance = direction.multiplyScalar(13); // Assuming 13 is the distance from the player
+  
+      const tiltedPosition = new THREE.Vector3(
+          personRef.current.position.x + horizontalDistance.x,
+          personRef.current.position.y + offset.y, // Set height
+          personRef.current.position.z + horizontalDistance.z
+      );
+  
       camera.position.copy(tiltedPosition);
       camera.lookAt(personRef.current.position);
-      camera.up.set(0, 1, 0); // Reset the up vector to default
-    };
+      camera.up.set(0, 1, 0); // Ensure the up vector is correct
+  };
 
     // useEffect(() => {
     //   if (personRef.current && !initialPositionSet.current) {
     //     setInitialCameraPosition();
     //   }
     // }, [personRef.current]); 
+
+    useEffect(() => {
+      lastTheta.current = THREE.MathUtils.degToRad(compassHeading); // Initialize with the current heading in radians
+    }, []);
 
     useEffect(()=>{
       if (cameraMode == CAMERA_MODES.TOP_DOWN) {
@@ -478,36 +495,75 @@ const handleTouchEnd = () => {
 
     // Apply rotation and zoom based on velocity
     useFrame(({ camera }) => {
-      if (Math.abs(rotationVelocity.theta) > 0.0001 || Math.abs(rotationVelocity.phi) > 0.0001) {
-          const offset = new THREE.Vector3().subVectors(camera.position, personRef.current.position);
-          const spherical = new THREE.Spherical().setFromVector3(offset);
-          spherical.theta += rotationVelocity.theta;
+      // if (Math.abs(rotationVelocity.theta) > 0.0001 || Math.abs(rotationVelocity.phi) > 0.0001) {
+      //     const offset = new THREE.Vector3().subVectors(camera.position, personRef.current.position);
+      //     const spherical = new THREE.Spherical().setFromVector3(offset);
+      //     spherical.theta += rotationVelocity.theta;
   
-          // Calculate new phi ensuring it doesn't go below the minimum polar angle
-          const newPhi = spherical.phi + rotationVelocity.phi;
-          spherical.phi = Math.max(0, Math.min(maxPolarAngle, newPhi)); // Clamping phi within the desired range
+      //     // Calculate new phi ensuring it doesn't go below the minimum polar angle
+      //     const newPhi = spherical.phi + rotationVelocity.phi;
+      //     spherical.phi = Math.max(0, Math.min(maxPolarAngle, newPhi)); // Clamping phi within the desired range
   
-          spherical.makeSafe();
-          offset.setFromSpherical(spherical);
-          if(cameraMode === CAMERA_MODES.TILTED) {
-            camera.position.copy(personRef.current.position).add(offset);
-            camera.lookAt(personRef.current.position);
-          }
+      //     spherical.makeSafe();
+      //     offset.setFromSpherical(spherical);
+      //     if(cameraMode === CAMERA_MODES.TILTED) {
+      //       camera.position.copy(personRef.current.position).add(offset);
+      //       camera.lookAt(personRef.current.position);
+      //     }
   
-          // Apply damping to rotation velocity
-          setRotationVelocity(prev => ({
-              theta: prev.theta * (1 - rotateDamping),
-              phi: prev.phi * (1 - rotateDamping)
-          }));
-      }
+      //     // Apply damping to rotation velocity
+      //     setRotationVelocity(prev => ({
+      //         theta: prev.theta * (1 - rotateDamping),
+      //         phi: prev.phi * (1 - rotateDamping)
+      //     }));
+      // }
 
   
-      // Handle zoom
-      if (Math.abs(zoomVelocity - 1) > 0.001) {
-          camera.zoom *= zoomVelocity;
-          camera.updateProjectionMatrix();
-          setZoomVelocity(prev => prev + (1 - prev) * zoomDamping);
-      }
+      // // Handle zoom
+      // if (Math.abs(zoomVelocity - 1) > 0.001) {
+      //     camera.zoom *= zoomVelocity;
+      //     camera.updateProjectionMatrix();
+      //     setZoomVelocity(prev => prev + (1 - prev) * zoomDamping);
+      // }
+
+      if (!personRef.current) {
+        return;
+    }
+
+    const currentThetaRad = THREE.MathUtils.degToRad(compassHeading) % (2 * Math.PI);
+        let lastThetaRad = lastTheta.current;
+
+        // Normalize lastTheta to ensure it's always within the same range as currentThetaRad
+        lastThetaRad = lastThetaRad % (2 * Math.PI);
+
+        // Determine the shortest path difference
+        let deltaTheta = currentThetaRad - lastThetaRad;
+        if (deltaTheta > Math.PI) {
+            deltaTheta -= 2 * Math.PI; // Rotate counterclockwise
+        } else if (deltaTheta < -Math.PI) {
+            deltaTheta += 2 * Math.PI; // Rotate clockwise
+        }
+
+        // Update the spherical coordinates of the camera
+        const offset = new THREE.Vector3().subVectors(camera.position, personRef.current.position);
+        const spherical = new THREE.Spherical().setFromVector3(offset);
+        spherical.theta += deltaTheta; // Apply the calculated delta directly
+
+        // Set the phi based on camera mode
+        if (cameraMode === 'TILTED') {
+            spherical.phi = Math.PI / 3;
+        } else if (cameraMode === 'TOP_DOWN') {
+            spherical.phi = Math.PI / 2;
+        }
+        spherical.radius = 10;
+
+        // Apply updates to camera position
+        offset.setFromSpherical(spherical);
+        camera.position.copy(personRef.current.position).add(offset);
+        camera.lookAt(personRef.current.position);
+
+        // Update lastTheta for the next frame
+        lastTheta.current = spherical.theta;
   });
     
 
@@ -558,7 +614,7 @@ const handleTouchEnd = () => {
           }
           return null;
         })}
-        <BlockedArea blockedCenterX={blockedCenterX} blockedCenterY={blockedCenterY} blockedWidth={blockedWidth} blockedHeight={blockedHeight} />
+        {/* <BlockedArea blockedCenterX={blockedCenterX} blockedCenterY={blockedCenterY} blockedWidth={blockedWidth} blockedHeight={blockedHeight} /> */}
 
         <mesh ref={personRef} position={[centerX * tileSize, 0, centerY * tileSize]}>
           <boxGeometry args={[tileSize, 2, tileSize]} />

@@ -1,0 +1,12 @@
+{
+    "busy_hours": [
+      { "day": "Monday", "hours": "16:00 - 18:00" },
+      { "day": "Tuesday", "hours": "17:00 - 19:00" },
+      { "day": "Wednesday", "hours": "15:00 - 17:00" },
+      { "day": "Thursday", "hours": "16:00 - 18:00" },
+      { "day": "Friday", "hours": "17:00 - 18:00" },
+      { "day": "Saturday", "hours": "11:00 - 13:00" },
+      { "day": "Sunday", "hours": "12:00 - 14:00" }
+    ]
+  }
+  
