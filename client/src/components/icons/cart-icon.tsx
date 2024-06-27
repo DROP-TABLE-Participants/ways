@@ -1,4 +1,36 @@
+import {useEffect, useState} from "react";
+
 function CartIcon() {
+    const [numberOfPRoducts, setNumberOfProducts] = useState(0);
+    
+    const fetchNumberOfProducts = () => {
+        fetch('http://localhost:4000/api/cart', {
+            credentials: 'include',
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then((data: {product_id: number, quantity: number}[]) => {
+                setNumberOfProducts(data.length);
+            });
+    }
+    
+    useEffect(() => {
+        fetchNumberOfProducts();
+        
+        document.addEventListener('cartUpdate', () => {
+            fetchNumberOfProducts();
+        })
+        
+        return () => {
+            document.removeEventListener('cartUpdate', () => {
+                fetchNumberOfProducts();
+            });
+        }
+    }, []);
+    
     return (
         <>
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">
@@ -12,7 +44,7 @@ function CartIcon() {
                 color: "white"
                 }
             
-            }>1</p>
+            }>{numberOfPRoducts}</p>
         </>
     );
 };

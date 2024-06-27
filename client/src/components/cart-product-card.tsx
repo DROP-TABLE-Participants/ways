@@ -1,6 +1,8 @@
 import '../styles/component-styles/cart-product-card.scss';
+import QuantityChange from "./quantity-change";
 
 interface ProductCartCardProps {
+    id: number;
     name: string;
     imageUrl: string;
     price: number;
@@ -15,13 +17,9 @@ function ProductCartCard (props: ProductCartCardProps) {
                 <p className="product-card-name">{props.name}</p>
                 <p className="product-card-price">{props.price} лв.</p>
             </div>
-            <div className="product-card-quantity">
-                <button className="quantity-circle-button">-</button>
-                <p className="quantity-number">{props.quantity}</p>
-                <button className="quantity-circle-button">+</button>
-            </div>
+           <QuantityChange id={props.id} quantity={props.quantity} />
         </div>
     );
-};
+}
 
 export default ProductCartCard;
