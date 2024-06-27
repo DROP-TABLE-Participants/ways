@@ -9,7 +9,7 @@ export type Product = {
     id: number;
     name: string;
     imageUrl: string;
-    quantity: number;
+    price: number;
     category: string;
 }
 
@@ -51,7 +51,7 @@ function Category() {
                 setProducts(data.map((object) => ({
                     name: object.name,
                     imageUrl: categoryUrls[name!],
-                    quantity: object.quantity,
+                    price: object.price,
                     id: object.id,
                     category: object.category
                 })));
@@ -85,7 +85,7 @@ function Category() {
                     imageUrl={object.imageUrl}
                     key={i}
                     quantity={quantities[i] || 1}
-                    price={Math.floor(Math.random() * 29) + 1}
+                    price={object.price}
                     id={object.id}
                     inCart={inCart[i]}
                 />)}

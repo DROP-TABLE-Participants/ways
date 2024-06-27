@@ -12,6 +12,7 @@ type FetchProduct = {
     name: string;
     quantity: number;
     category: string;
+    price: number;
 }
 
 type CartProduct = {
@@ -91,7 +92,7 @@ function CartPanel() {
                       id={object.product_id}
                       name={object.product.name}
                       imageUrl={categoryUrls[object.product.category]}
-                      price={10}
+                      price={object.product.price}
                       quantity={object.quantity} 
                       key={i} 
                   />)

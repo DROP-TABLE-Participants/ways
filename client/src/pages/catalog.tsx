@@ -60,7 +60,7 @@ function Catalog() {
                 setProducts(data.map((object) => ({
                     name: object.name,
                     imageUrl: categoryUrls[object.category!],
-                    quantity: object.quantity,
+                    price: object.price,
                     id: object.id,
                     category: object.category
                 })));
