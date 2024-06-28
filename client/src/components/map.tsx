@@ -7,6 +7,7 @@ import useDeviceOrientation from '../hooks/DeviceOrientation';
 import { blockedAreaMaterial, PathShaderMaterial, PulsingMaterial, GradientMaterial, BlockedTileMaterial } from './mapScene/materials';
 import MapProductLabel from './mapProductLabel';
 import { Toaster, toast } from 'sonner';
+import ProximityProductPopup from './ProximirtyProductPopup';
 
 const tileSize = 1; // Global tile size variable
 
@@ -95,6 +96,8 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
   const personRef: any = useRef();
   const controlsRef: any = useRef();
 
+  let closeProduct: any = useRef();
+
   const CAMERA_MODES = {
     TILTED: 'tilted',
     TOP_DOWN: 'topdown'
@@ -113,7 +116,7 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
           const distance = Math.sqrt(dx * dx + dy * dy);
   
           if (distance <= proximityThreshold) {
-            toast.success(`Close to product: ${product.product.name}`)
+            closeProduct.current = product.product;
           }
         });
       }
@@ -502,6 +505,7 @@ const handleTouchEnd = () => {
         
         })}
         <HandleProductProximity/>
+        <ProximityProductPopup product={closeProduct} onProductCollect={()=>{alert('hello')}}/>
         {/* <BlockedArea blockedCenterX={blockedCenterX} blockedCenterY={blockedCenterY} blockedWidth={blockedWidth} blockedHeight={blockedHeight} />  */}
 
         <mesh ref={personRef} position={[0, 0, 6]}>

@@ -54,7 +54,6 @@ function StoreNavigation() {
 
           const resData: {product_id: number, quantity: number}[] = await res.json();
           
-          console.log(resData)
 
           setAvailableItems(data.products.map((product: any, index: number) => {
             {
