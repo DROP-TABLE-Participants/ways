@@ -58,14 +58,26 @@ Pasting this line of code in **your favourite Terminal**:
 
 <h3><B>Running the App:</B></h3>
 
-<pre>docker compose up</pre>
-<pre>cd client && npm install && npm run dev</pre>
+<pre>
+docker compose up
+
+# Running the migrations
+docker-compose exec server poetry run aerich init -t data.data.TORTOISE_ORM
+
+docker-compose exec server poetry run aerich migrate
+docker-compose exec server poetry run aerich upgrade
+</pre>
+<pre>
+cd client
+npm install
+npm run dev
+</pre>
 
 <hr>
 
 <h3><B>Website domain:</B></h3>
 
-<pre>https://icy-island-00ed8aa03.5.azurestaticapps.net/</pre>
+<pre>https://ways.codingburgas.bg/</pre>
 
 <hr>
 
