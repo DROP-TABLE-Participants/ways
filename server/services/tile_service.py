@@ -20,3 +20,8 @@ class TileService:
     async def delete_tile(cls, tile_id: int):
         tile = await Tile.get(id=tile_id)
         await tile.delete()
+
+    # get tile by product id
+    @staticmethod
+    async def get_tile_by_product_id(product_id: int):
+        return await Tile_Pydantic.from_queryset_single(Tile.get(product_id=product_id))

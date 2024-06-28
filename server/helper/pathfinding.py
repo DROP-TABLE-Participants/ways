@@ -1,4 +1,5 @@
 import time
+import json
 import itertools
 from typing import List
 import pickle
@@ -12,6 +13,11 @@ async def get_path(items: List[str]):
     t0 = time.time()
     astar = AStar(items)
     await astar.init_maze()
+
+    cached = redis_client.get(str(sorted(items)))
+
+    if cached:
+        return json.loads(cached)
 
     paths = {}
 
@@ -32,8 +38,6 @@ async def get_path(items: List[str]):
                 astar.add_point(node1)
             elif node2 in golden_eggs:
                 astar.add_point(node2)
-
-            print(node1, node2, astar.get_point(node1), astar.get_point(node2))
 
             res = astar.search(astar.get_point(node1), astar.get_point(node2))
 
@@ -95,6 +99,8 @@ async def get_path(items: List[str]):
 
     t1 = time.time()
 
-    print(t1 - t0)
+    minimum_distance = min(distances, key=lambda x: x[0])
 
-    return min(distances, key=lambda x: x[0])
+    redis_client.set(str(sorted(items)), json.dumps(minimum_distance))
+
+    return minimum_distance

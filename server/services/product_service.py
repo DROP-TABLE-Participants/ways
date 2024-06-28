@@ -46,3 +46,8 @@ class ProductService:
         if tile.product:
             product = await tile.product.get()
             return await Product.filter(id=product.id).first()
+
+    # find product by legacy id
+    @staticmethod
+    async def get_product_by_legacy_id(legacy_id: str):
+        return await Product_Pydantic.from_queryset_single(Product.get(legacy_product_id=legacy_id))

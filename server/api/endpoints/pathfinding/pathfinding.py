@@ -5,6 +5,8 @@ from starlette.responses import Response
 
 from services.auth_service import get_user_id
 from services.product_service import ProductService
+from services.tile_service import TileService
+
 from helper.pathfinding import get_path
 
 
@@ -34,11 +36,17 @@ async def get_route(request: Request, response: Response, user_id: str = Depends
     products_raw = path[2]
     products = []
 
-    # for product in products_raw:
-    #     product_obj = await ProductService.get_product_by_id(product)
-    #     products.append(product_obj)
+    for product in products_raw:
+        if product.startswith("P"):
+            product_obj = await ProductService.get_product_by_legacy_id(product)
+            tile_obj = await TileService.get_tile_by_product_id(product_obj.id)
+            products.append({
+                "product": product_obj,
+                "tile": tile_obj
 
-    return {"path": path[1], "distance": path[0], "products": path[2]}
+            })
+
+    return {"path": path[1], "distance": path[0], "products": products}
 
 
 
