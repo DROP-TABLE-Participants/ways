@@ -45,6 +45,33 @@ async def get_route(request: Request, response: Response, user_id: str = Depends
                 "tile": tile_obj
 
             })
+        elif product.startswith("S") or product.startswith("C"):
+            t = None
+            if product.startswith("S"):
+                t = 2
+            else:
+                t = 1
+
+            num = product[-1]
+
+            if t == 2:
+                if num == "1":
+                    products.append((3, 16))
+                elif num == "2":
+                    products.append((5, 16))
+                elif num == "3":
+                    products.append((3, 14))
+                else:
+                    products.append((5, 14))
+            else:
+                if num == "1":
+                    products.append((3, 20))
+                elif num == "2":
+                    products.append((3, 18))
+                elif num == "3":
+                    products.append((5, 18))
+                elif num == "4":
+                    products.append((5, 20))
 
     return {"path": path[1], "distance": path[0], "products": products}
 
