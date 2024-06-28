@@ -17,8 +17,9 @@ async def get_path(items: List[str]):
 
     additional_paths = ["EN", "EX"]
     exits = ["CA1", "CA2", "CA3", "CA4", "S1", "S2", "S3", "S4"]
+    golden_eggs = ["P204", "P19", "P269", "P101", "P300"]
 
-    for node1, node2 in itertools.combinations(items + additional_paths + exits, 2):
+    for node1, node2 in itertools.combinations(items + additional_paths + exits + golden_eggs, 2):
         cached_path = redis_client.get(f"{node1}:{node2}")
 
         if not cached_path:
@@ -27,7 +28,19 @@ async def get_path(items: List[str]):
             elif node2 in exits:
                 astar.add_point(node2)
 
-            distance, path = astar.search(astar.get_point(node1), astar.get_point(node2))
+            if node1 in golden_eggs:
+                astar.add_point(node1)
+            elif node2 in golden_eggs:
+                astar.add_point(node2)
+
+            print(node1, node2, astar.get_point(node1), astar.get_point(node2))
+
+            res = astar.search(astar.get_point(node1), astar.get_point(node2))
+
+            if not res:
+                continue
+
+            distance, path = res
 
             paths[(node1, node2)] = [distance, path]
             paths[(node2, node1)] = [distance, path[::-1]]
@@ -39,6 +52,11 @@ async def get_path(items: List[str]):
                 astar.remove_point(node1)
             elif node2 in exits:
                 astar.remove_point(node2)
+
+            if node1 in golden_eggs:
+                astar.remove_point(node1)
+            elif node2 in golden_eggs:
+                astar.remove_point(node2)
         else:
             distance, path = pickle.loads(cached_path.encode("latin1"))
 
@@ -49,30 +67,31 @@ async def get_path(items: List[str]):
 
     for permutation in itertools.permutations(items):
         for end_point in ["CA1", "CA2", "CA3", "CA4", "S1", "S2", "S3", "S4"]:
-            whole_path = ["EN"] + list(permutation) + [end_point] + ["EX"]
+           for egg in golden_eggs:
+                whole_path = ["EN"] + list(permutation) + [egg] + [end_point] + ["EX"]
 
-            dis = 0
-            path = []
+                dis = 0
+                path = []
 
-            for i in range(len(whole_path) - 1):
-                item1 = whole_path[i]
-                item2 = whole_path[i + 1]
+                for i in range(len(whole_path) - 1):
+                    item1 = whole_path[i]
+                    item2 = whole_path[i + 1]
 
-                if (item1, item2) in paths:
-                    the_path = paths[(item1, item2)][1]
-                    the_distance = paths[(item1, item2)][0]
-                else:
-                    the_path = paths[(item2, item1)][1]
-                    the_distance = paths[(item2, item1)][0]
+                    if (item1, item2) in paths:
+                        the_path = paths[(item1, item2)][1]
+                        the_distance = paths[(item1, item2)][0]
+                    else:
+                        the_path = paths[(item2, item1)][1]
+                        the_distance = paths[(item2, item1)][0]
 
-                if 0 < i < len(whole_path) - 1:
-                    the_path = the_path[1:]
-                    the_distance -= 1
+                    if 0 < i < len(whole_path) - 1:
+                        the_path = the_path[1:]
+                        the_distance -= 1
 
-                dis += the_distance
-                path.extend(the_path)
+                    dis += the_distance
+                    path.extend(the_path)
 
-            distances.append([dis, path, whole_path])
+                distances.append([dis, path, whole_path])
 
     t1 = time.time()
 
