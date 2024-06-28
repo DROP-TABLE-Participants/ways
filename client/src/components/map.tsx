@@ -4,8 +4,9 @@ import { Canvas, useFrame, useThree, extend } from '@react-three/fiber';
 import TWEEN from '@tweenjs/tween.js';
 import { Html, Line } from '@react-three/drei';
 import useDeviceOrientation from '../hooks/DeviceOrientation';
-import { blockedAreaMaterial, PathShaderMaterial, PulsingMaterial, GradientMaterial } from './mapScene/materials';
+import { blockedAreaMaterial, PathShaderMaterial, PulsingMaterial, GradientMaterial, BlockedTileMaterial } from './mapScene/materials';
 import MapProductLabel from './mapProductLabel';
+import { Toaster, toast } from 'sonner';
 
 const tileSize = 1; // Global tile size variable
 
@@ -43,14 +44,15 @@ const calcDimensions = (tiles: Array<any>) => {
     blockedCenterY: (blockedMinY + blockedMaxY) / 2 * tileSize
   };
 };
+;
   
-const BlockedArea = ({ blockedCenterX, blockedCenterY, blockedWidth, blockedHeight }: any) => {
-  return(
-  <mesh position={[blockedCenterX, 0.05, blockedCenterY]} material={blockedAreaMaterial}>
-    <boxGeometry args={[blockedWidth, 0.1, blockedHeight]} />
-    {/* <meshBasicMaterial color={0xffffff} /> */}
-  </mesh>)
-};
+// const BlockedArea = ({ blockedCenterX, blockedCenterY, blockedWidth, blockedHeight }: any) => {
+//   return(
+//   <mesh position={[blockedCenterX, 0.05, blockedCenterY]} material={blockedAreaMaterial}>
+//     <boxGeometry args={[blockedWidth, 0.1, blockedHeight]} />
+//     <meshBasicMaterial color={0xffffff} />
+//   </mesh>)
+// };
 
 // Extend the drei components to use this new material
 extend({ PathShaderMaterial });
@@ -100,9 +102,29 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
 
   const [cameraMode, setCameraMode] = useState(CAMERA_MODES.TILTED);
 
+  const proximityThreshold = tileSize * 2;
+
+  const HandleProductProximity = () => {
+    useFrame(() => {
+      if (personRef.current && selectedProducts) {
+        selectedProducts.forEach((product: any) => {
+          const dx = personRef.current.position.x - product.tile.x * tileSize;
+          const dy = personRef.current.position.z - product.tile.y * tileSize; // Assuming Z is the up-down axis in your coordinate system
+          const distance = Math.sqrt(dx * dx + dy * dy);
+  
+          if (distance <= proximityThreshold) {
+            toast.success(`Close to product: ${product.product.name}`)
+          }
+        });
+      }
+    });
+
+    return (<></>);
+  }
 
 
-  const ProductTile = ({ x, y, type }: any) => {
+
+  const Tile = ({ x, y, type }: any) => {
     const ref: any = useRef();
     const material: any = useRef();  
     // if (false) {
@@ -110,6 +132,9 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
     // } else {
     //   material.current = new GradientMaterial();
     // }
+
+    if(type === 6 || type === 7) return
+
 
     let selectedProduct: any = undefined;
 
@@ -126,15 +151,26 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
       material.current = new GradientMaterial();
     }
 
+    if(type === 4 )
+    {
+      material.current = new BlockedTileMaterial();
+    }
   
     useFrame(({ clock }) => {
       TWEEN.update();
-      if (material.current.uniforms) {
+      if (material.current.uniforms && type != 4) {
         material.current.uniforms.time.value = clock.getElapsedTime();
       }
     });
+
+    let geometry = new THREE.BoxGeometry(tileSize, tileSize, tileSize);;
   
-    const geometry = new THREE.BoxGeometry(tileSize, (type === 0 || type === 5) ? tileSize * 2 : tileSize, tileSize);
+    if(type === 0 || type === 5) {
+      geometry = new THREE.BoxGeometry(tileSize, tileSize * 2, tileSize);
+    }
+    if(type === 4) {
+      geometry = new THREE.BoxGeometry(tileSize, tileSize * 0.5, tileSize);
+    }
   
     return (
       <mesh ref={ref} position={[x * tileSize, geometry.parameters.height / 2, y * tileSize]} material={material.current} castShadow receiveShadow>
@@ -459,26 +495,27 @@ const handleTouchEnd = () => {
         <Path points={path}/>
         <ambientLight intensity={20} color='#eff5fb'/>
         <directionalLight position={[10, 20, 10]} intensity={1} color='#f2f5fa' castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} />
-        <fog attach="fog" args={['#dfe9f5', 0.1, 200]} />
+        <fog attach="fog" args={['#dfe9f5', 0.1, 50]} />
 
         {tiles.map((tile: any) => {
-          if (tile.type !== 4) {
-            return <ProductTile key={`${tile.x}-${tile.y}`} type={tile.type} x={tile.x} y={tile.y} />;
-          }
-          return null;
+            return <Tile key={`${tile.x}-${tile.y}`} type={tile.type} x={tile.x} y={tile.y} />;
+        
         })}
-        <BlockedArea blockedCenterX={blockedCenterX} blockedCenterY={blockedCenterY} blockedWidth={blockedWidth} blockedHeight={blockedHeight} /> 
+        <HandleProductProximity/>
+        {/* <BlockedArea blockedCenterX={blockedCenterX} blockedCenterY={blockedCenterY} blockedWidth={blockedWidth} blockedHeight={blockedHeight} />  */}
 
         <mesh ref={personRef} position={[0, 0, 6]}>
-          <boxGeometry args={[tileSize, 2, tileSize]} />
-          <meshBasicMaterial color={0xffffff} />
+          <sphereGeometry args={[tileSize / 2, 32, 32]} /> {/* tileSize / 2 is the radius, 32 segments for smoothness both horizontally and vertically */}
+          <meshPhongMaterial color={new THREE.Color("grey")} />
         </mesh>
         
 
       </Canvas>
-      <button onClick={() => setCameraMode(CAMERA_MODES.TILTED)}>Tilted View</button>
-      <button onClick={() => setCameraMode(CAMERA_MODES.TOP_DOWN)}>Top Down View</button>
-      <button id="resetButton">Reset View</button>
+      <div className="camera-control-buttons-container">
+      <button onClick={() => setCameraMode(CAMERA_MODES.TILTED)}>Отстрани</button>
+      <button onClick={() => setCameraMode(CAMERA_MODES.TOP_DOWN)}>Отгоре</button>
+      </div>
+      <Toaster richColors />
     </>
   )
 };

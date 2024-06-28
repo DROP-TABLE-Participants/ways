@@ -99,3 +99,25 @@ export  const PathShaderMaterial = shaderMaterial(
       gl_FragColor = mix(vec4(color, 1.0), vec4(0.5, 0.7, 1.0, 1.0), stripe);
     }`
   );
+
+  export const BlockedTileMaterial = shaderMaterial(
+    // Uniforms (global variables that you can use in the shader)
+    {
+      color: new THREE.Color(1, 0, 0), // RGB red
+      opacity: .8 // Semi-transparent
+    },
+    // Vertex Shader
+    `
+    void main() {
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+    `,
+    // Fragment Shader
+    `
+    uniform vec3 color;
+    uniform float opacity;
+    void main() {
+      gl_FragColor = vec4(color, opacity); // Set the color and opacity
+    }
+    `
+  );

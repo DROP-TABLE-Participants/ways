@@ -11,7 +11,24 @@
     
     .map-container {
         width: 100%;
-        height: 75vh;
+        height: 82vh;
         transition: .1s;
+
+        .camera-control-buttons-container {
+            position: absolute;
+            top: 2%;
+            left: 2%;
+
+            button {
+                border: none;
+                outline: none;
+                background: rgba(255, 255, 255, 0.385);
+                padding: .5rem;
+                margin-right: 1rem;
+                border-radius: 7px;
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(0, 0, 0, 0.139);
+            }
+        }
     }
 }
