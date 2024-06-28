@@ -16,7 +16,7 @@ function Admin() {
             navigator('/login');
         }
 
-        fetch('https://ways-api.azurewebsites.net/api/tile')
+        fetch('https://ways-api.codingburgas.bg/api/tile')
             .then(response => response.json())
             .then((data) => setTiles(data));
     }, []);
@@ -33,7 +33,7 @@ function Admin() {
     };
 
     const handleLogout = () => {
-        fetch('https://ways-api.azurewebsites.net/api/admin/auth/logout', {
+        fetch('https://ways-api.codingburgas.bg/api/admin/auth/logout', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -47,7 +47,7 @@ function Admin() {
 
     const handleSaveChanges = async () => {
         const deletePromises = deleteOperations.map(id => 
-            fetch(`https://ways-api.azurewebsites.net/api/tile/${id}`, {
+            fetch(`https://ways-api.codingburgas.bg/api/tile/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ function Admin() {
         );
 
         const putPromises = putOperations.map(tile =>
-            fetch('https://ways-api.azurewebsites.net/api/tile', {
+            fetch('https://ways-api.codingburgas.bg/api/tile', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -92,7 +92,7 @@ function Admin() {
         setDeleteOperations([]);
         setPutOperations([]);
 
-        const res = await fetch('https://ways-api.azurewebsites.net/api/tile');
+        const res = await fetch('https://ways-api.codingburgas.bg/api/tile');
         const data = await res.json();
 
         setTiles(data);

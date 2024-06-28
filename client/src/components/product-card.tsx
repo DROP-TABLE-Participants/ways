@@ -16,7 +16,7 @@ function ProductCard (props: ProductCardProps) {
     const [inCart, setInCart] = useState<boolean>(props.inCart);
     
     const addToCart = (id: number) => {
-        fetch('https://ways-api.azurewebsites.net/api/cart', {
+        fetch('https://ways-api.codingburgas.bg/api/cart', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'

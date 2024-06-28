@@ -22,7 +22,7 @@ function Catalog() {
     const navigator = useNavigate();
     
     useEffect(() => {
-        fetch('https://ways-api.azurewebsites.net/api/product/categories')
+        fetch('https://ways-api.codingburgas.bg/api/product/categories')
             .then(response => response.json())
             .then((data: string[]) => setProductCategories(
                 data.map(item => ({name: item, imageUrl: categoryUrls[item]}))
@@ -38,11 +38,11 @@ function Catalog() {
     }
 
     const updateCart = () => {
-        fetch(`https://ways-api.azurewebsites.net/api/product?search=${searchQuery}`)
+        fetch(`https://ways-api.codingburgas.bg/api/product?search=${searchQuery}`)
             .then(response => response.json())
             .then(async (data: Product[]) => {
 
-                const res = await fetch('https://ways-api.azurewebsites.net/api/cart', {
+                const res = await fetch('https://ways-api.codingburgas.bg/api/cart', {
                     credentials: 'include',
                     method: 'GET',
                     headers: {

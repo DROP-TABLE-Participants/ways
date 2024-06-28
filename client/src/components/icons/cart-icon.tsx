@@ -4,7 +4,7 @@ function CartIcon() {
     const [numberOfPRoducts, setNumberOfProducts] = useState(0);
     
     const fetchNumberOfProducts = () => {
-        fetch('https://ways-api.azurewebsites.net/api/cart', {
+        fetch('https://ways-api.codingburgas.bg/api/cart', {
             credentials: 'include',
             method: 'GET',
             headers: {
@@ -13,6 +13,7 @@ function CartIcon() {
         })
             .then(response => response.json())
             .then((data: {product_id: number, quantity: number}[]) => {
+                console.log(data, data.length)
                 setNumberOfProducts(data.length);
             });
     }

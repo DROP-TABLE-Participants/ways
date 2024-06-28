@@ -28,6 +28,7 @@ function CartPanel() {
   const [cartProducts, setCartProducts] = useState<CartProduct[]>([]);
 
   const givePermissions = async () => {
+    /*
     if (typeof DeviceOrientationEvent.requestPermission === 'function') {
         try {
             const orientationPermission = await DeviceOrientationEvent.requestPermission();
@@ -42,11 +43,12 @@ function CartPanel() {
     } else {
 
     }
+    */
 }
   const [busyHours, setBusyHours] = useState<string>('16:00 - 18:00');
 
   const fetchProductById = async (id: number): Promise<FetchProduct> => {
-    const res = await fetch(`https://ways-api.azurewebsites.net/api/product/${id}`, {
+    const res = await fetch(`https://ways-api.codingburgas.bg/api/product/${id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -58,7 +60,7 @@ function CartPanel() {
   }
   
   const fetchCartProducts = () => {
-    fetch('https://ways-api.azurewebsites.net/api/cart', {
+    fetch('https://ways-api.codingburgas.bg/api/cart', {
         credentials: 'include',
         method: 'GET',
         headers: {

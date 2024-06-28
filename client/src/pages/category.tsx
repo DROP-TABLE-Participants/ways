@@ -29,11 +29,11 @@ function Category() {
     }
 
     const updateCart = () => {
-        fetch(`https://ways-api.azurewebsites.net/api/product?filter_category=${name}`)
+        fetch(`https://ways-api.codingburgas.bg/api/product?filter_category=${name}`)
             .then(response => response.json())
             .then(async (data: Product[]) => {
 
-                const res = await fetch('https://ways-api.azurewebsites.net/api/cart', {
+                const res = await fetch('https://ways-api.codingburgas.bg/api/cart', {
                     credentials: 'include',
                     method: 'GET',
                     headers: {

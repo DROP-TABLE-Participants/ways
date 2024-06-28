@@ -1,6 +1,6 @@
 function QuantityChange(props : {id: number, quantity: number}) {
     const addQuantity =  async (quantity: number) => {
-        await fetch('https://ways-api.azurewebsites.net/api/cart', {
+        await fetch('https://ways-api.codingburgas.bg/api/cart', {
             credentials: 'include',
             method: 'PUT',
             headers: {
@@ -16,7 +16,7 @@ function QuantityChange(props : {id: number, quantity: number}) {
     }
 
     const removeQuantity = async (quantity: number) => {
-        await fetch('https://ways-api.azurewebsites.net/api/cart', {
+        await fetch('https://ways-api.codingburgas.bg/api/cart', {
             credentials: 'include',
             method: 'DELETE',
             headers: {

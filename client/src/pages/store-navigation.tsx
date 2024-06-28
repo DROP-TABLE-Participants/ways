@@ -4,56 +4,106 @@ import StoreNavigationCard from '../components/store-navigation-card';
 import '../styles/page-styles/store-navigation.scss';
 import Map from '../components/map';
 import useDeviceOrientation from '../hooks/DeviceOrientation';
+import { Product } from './category';
+import categoryUrls from '../assets/category-urls';
+
+type CartItem = {
+  product: Product | null,
+  quantity: number,
+  isNext: boolean,
+  isAcquired: boolean,
+  isGolderEgg: boolean,
+  isCheckout: false,
+}
 
 function StoreNavigation() {
   const tempImageUrl = "https://www.healthyeating.org/images/default-source/home-0.0/nutrition-topics-2.0/general-nutrition-wellness/2-2-2-3foodgroups_fruits_detailfeature.jpg?sfvrsn=64942d53_4";
   const [isOpen] = useState(true);
-  const [availableItems] = useState([
-    { name: "Банани", quantity: 2, imageUrl: tempImageUrl, price: 10, isNext: false, isAcquired: false, isGoldenEgg: false, isCheckout: false },
-    { name: "Атанани", quantity: 3, imageUrl: tempImageUrl, price: 15, isNext: false, isAcquired: false, isGoldenEgg: true, isCheckout: false },
-    { name: "Борани", quantity: 3, imageUrl: tempImageUrl, price: 15, isNext: false, isAcquired: false, isGoldenEgg: false, isCheckout: false },
-    { name: "Каса Илко", quantity: 3, imageUrl: tempImageUrl, price: 15, isNext: false, isAcquired: false, isGoldenEgg: false, isCheckout: false }
-  ]);
-  const [acquiredItems] = useState([
-    { name: "Калани", quantity: 2, imageUrl: tempImageUrl, price: 10, isNext: false, isAcquired: true, isGoldenEgg: false, isCheckout: false },
-    { name: "Стояни", quantity: 3, imageUrl: tempImageUrl, price: 15, isNext: false, isAcquired: true, isGoldenEgg: false, isCheckout: false },
-    { name: "Никиани", quantity: 3, imageUrl: tempImageUrl, price: 15, isNext: false, isAcquired: true, isGoldenEgg: false, isCheckout: false }
-  ]);
+  const [availableItems, setAvailableItems] = useState<CartItem[]>([]);
+  const [acquiredItems, setAcquiredItems] = useState<CartItem[]>([]);
   const ref = useRef<SheetRef>(null);
   const snapTo = (i: number) => ref.current?.snapTo(i);
 
-  let deviceOrientation = useDeviceOrientation();
-
   const [tiles, setTiles] = useState([]);
   useEffect(() => {
-    fetch(`https://ways-api.azurewebsites.net/api/tile`)
+    fetch(`https://ways-api.codingburgas.bg/api/tile`)
         .then(response => response.json())
         .then((data) => setTiles(data));
 }, []);
 
+  const [cartProducts, setCartProducts] = useState([]);
   const [path, setPath] = useState(null)
 
   useEffect(()=>{
-    fetch(`https://ways-api.azurewebsites.net/api/pathfinding`, {
+
+    
+    fetch(`https://ways-api.codingburgas.bg/api/pathfinding`, {
       credentials: 'include'
     })
         .then(response => response.json())
-        .then((data) => {setPath(data.path)});
-  }, [])
+        .then(async (data) => {
+          setPath(data.path);
 
-  let selected_products = [{x:'27', y:'4', name: 'Borisi'}, {x:'33', y:'3', name: 'Atanasi'}, {x:'35', y:'20', name: 'Kalini'}]
+          const res = await fetch('https://ways-api.codingburgas.bg/api/cart', {
+            credentials: 'include',
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+          });
+
+          const resData: {product_id: number, quantity: number}[] = await res.json();
+          
+          console.log(resData)
+
+          setAvailableItems(data.products.map((product: any, index: number) => {
+            {
+              if (index == data.products.length - 1)
+              {
+                return {
+                  product: {name: "Kаса"},
+                  quantity: 0,
+                  isNext: false,
+                  isAcquired: false,
+                  isGolderEgg: false,
+                  isCheckout: true,
+                }
+              }
+              else if (index == 0) {
+                return {
+                  product: product.product,
+                  quantity: resData.find(el => el.product_id == product.product.id)?.quantity,
+                  isNext: true,
+                  isAcquired: false,
+                  isGolderEgg: product.tile.type == 5,
+                  isCheckout: false,
+                }
+              } else {
+                return {
+                  product: product.product,
+                  quantity: resData.find(el => el.product_id == product.product.id)?.quantity,
+                  isNext: false,
+                  isAcquired: false,
+                  isGolderEgg: product.tile.type == 5,
+                  isCheckout: false,
+                }
+              }
+            }
+          }))
+          data.products.pop();
+          setCartProducts(data.products);
+        });
+  }, [])
 
   return (
     <div className="content-container">
-
-      <h1>Device orientation: {deviceOrientation.toFixed(2)}</h1>
-      
+    
       <div className="map-container">
-        <Map tiles={tiles} selectedProducts={selected_products} path={path}/>
+        <Map tiles={tiles} selectedProducts={cartProducts} path={path}/>
       </div>
 
 
-      {/* <Sheet
+      <Sheet
         ref={ref}
         isOpen={isOpen}
         initialSnap={0}
@@ -68,15 +118,15 @@ function StoreNavigation() {
             <Sheet.Scroller>
               <div className="sheet-content">
                 <h4>Следващ продукт:</h4>
-                {availableItems.map((_, i) => (
+                {availableItems.map((item, i) => (
                   <StoreNavigationCard
-                    name={availableItems[i].name}
-                    imageUrl={availableItems[i].imageUrl}
-                    price={availableItems[i].price}
+                    name={item.product?.name!}
+                    imageUrl={categoryUrls[availableItems[i].product?.category!]}
+                    price={availableItems[i].product?.price!}
                     quantity={availableItems[i].quantity}
                     isNext={i === 0}
                     isAcquired={false}
-                    isGoldenEgg={availableItems[i].isGoldenEgg}
+                    isGoldenEgg={availableItems[i].isGolderEgg}
                     isCheckout={i === availableItems.length - 1}
                     key={i}
                     />
@@ -84,10 +134,10 @@ function StoreNavigation() {
                 <h4>Взети продукт:</h4>
                 {acquiredItems.map((_, i) => (
                   <StoreNavigationCard
-                    name={acquiredItems[i].name}
-                    imageUrl={acquiredItems[i].imageUrl}
-                    price={acquiredItems[i].price}
-                    quantity={acquiredItems[i].quantity}
+                    name={acquiredItems[i].product?.name!}
+                    imageUrl={categoryUrls[availableItems[i].product?.category!]}
+                    price={availableItems[i].product?.price!}
+                    quantity={availableItems[i].quantity}
                     isNext={false}
                     isAcquired={true}
                     isGoldenEgg={false}
@@ -99,7 +149,7 @@ function StoreNavigation() {
             </Sheet.Scroller>
           </Sheet.Content>
         </Sheet.Container>
-      </Sheet> */}
+      </Sheet>
     </div>
   );
 }

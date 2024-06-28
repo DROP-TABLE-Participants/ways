@@ -1,10 +1,11 @@
-import { useRef, useEffect, useState, useMemo } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { Canvas, useFrame, useThree, extend } from '@react-three/fiber';
-// import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
 import TWEEN from '@tweenjs/tween.js';
-import { Line, shaderMaterial } from '@react-three/drei';
+import { Html, Line } from '@react-three/drei';
 import useDeviceOrientation from '../hooks/DeviceOrientation';
+import { blockedAreaMaterial, PathShaderMaterial, PulsingMaterial, GradientMaterial } from './mapScene/materials';
+import MapProductLabel from './mapProductLabel';
 
 const tileSize = 1; // Global tile size variable
 
@@ -42,112 +43,14 @@ const calcDimensions = (tiles: Array<any>) => {
     blockedCenterY: (blockedMinY + blockedMaxY) / 2 * tileSize
   };
 };
-
-const GradientMaterial = shaderMaterial(
-  {
-    color1: new THREE.Color('#bad2e9'),
-    color2: new THREE.Color('#f3f8fc'),
-    time: 0,
-    tileSize: tileSize
-  },
-  `
-    varying vec3 vPosition;
-    void main() {
-      vPosition = position;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `
-  ,
-  `
-    uniform vec3 color1;
-    uniform vec3 color2;
-    uniform float tileSize;
-    varying vec3 vPosition;
-    void main() {
-      float height = (vPosition.y + tileSize);
-      vec3 color = mix(color1, color2, height);
-      gl_FragColor = vec4(color, 1.0);
-    }
-  `
-);
-
-const PulsingMaterial = shaderMaterial(
-  {
-    baseColor: new THREE.Color('#bad2e9'),
-    pulseColor: new THREE.Color('#0e0eff'),
-    time: 0,
-    tileSize: tileSize
-  },
-  `
-    varying vec3 vPosition;
-    void main() {
-      vPosition = position;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }`
-  ,
-    `
-    uniform vec3 baseColor;
-    uniform vec3 pulseColor;
-    uniform float time;
-    uniform float tileSize;
-    varying vec3 vPosition;
-    void main() {
-      float height = (vPosition.y + tileSize) / 0.5;
-      vec3 color = mix(baseColor, pulseColor, abs(sin(time * 3.0)) * height);
-      gl_FragColor = vec4(color, 1.0);
-    }
-  `
-);
   
 const BlockedArea = ({ blockedCenterX, blockedCenterY, blockedWidth, blockedHeight }: any) => {
-  const material = new THREE.ShaderMaterial({
-    uniforms: {
-      color: { value: new THREE.Color('#3b4d6b') },
-      opacity: { value: 0.5 }
-    },
-    vertexShader: `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-    `,
-    fragmentShader: `
-    uniform vec3 color;
-    uniform float opacity;
-    void main() {
-      gl_FragColor = vec4(color, opacity);
-    }
-    `,
-    transparent: true
-  });
-
   return(
-  <mesh position={[blockedCenterX, 0.05, blockedCenterY]} material={material}>
+  <mesh position={[blockedCenterX, 0.05, blockedCenterY]} material={blockedAreaMaterial}>
     <boxGeometry args={[blockedWidth, 0.1, blockedHeight]} />
     {/* <meshBasicMaterial color={0xffffff} /> */}
   </mesh>)
 };
-
-const PathShaderMaterial = shaderMaterial(
-  { time: 0, color: new THREE.Color(0x0000ff) },
-  `precision mediump float;
-  varying vec2 vUv;
-
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }`,
-  `precision mediump float;
-  uniform float time;
-  uniform vec3 color;
-  varying vec2 vUv;
-
-  void main() {
-    float stripe = sin(vUv.x * 10.0 + time * 2.0);
-    gl_FragColor = mix(vec4(color, 1.0), vec4(0.5, 0.7, 1.0, 1.0), stripe);
-  }`
-);
 
 // Extend the drei components to use this new material
 extend({ PathShaderMaterial });
@@ -166,7 +69,7 @@ function Path({ points }: {points: any}) {
 
 
   let vertices: Array<THREE.Vector3> = [];
-  points.forEach((point)=>{
+  points.forEach((point: any)=>{
     vertices.push(new THREE.Vector3(point[1], 0.1, point[0]))
   })
 
@@ -197,23 +100,22 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
 
   const [cameraMode, setCameraMode] = useState(CAMERA_MODES.TILTED);
 
+
+
   const ProductTile = ({ x, y, type }: any) => {
     const ref: any = useRef();
-    const material: any = useRef();
-  
+    const material: any = useRef();  
     // if (false) {
     //   material.current = new PulsingMaterial();
     // } else {
     //   material.current = new GradientMaterial();
     // }
 
-    useFrame(() => {
-        TWEEN.update();
-        // updateCamera();
-      });
+    let selectedProduct: any = undefined;
 
     if(selectedProducts) {
-      if(selectedProducts.some(p => p.x == x && p.y == y)) {
+      if(selectedProducts.some(p => p.tile.x == x && p.tile.y == y)) {
+        selectedProduct = selectedProducts.find((p: any) => p.tile.x == x && p.tile.y == y);
         material.current = new PulsingMaterial();
       }
       else {
@@ -226,6 +128,7 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
 
   
     useFrame(({ clock }) => {
+      TWEEN.update();
       if (material.current.uniforms) {
         material.current.uniforms.time.value = clock.getElapsedTime();
       }
@@ -236,26 +139,14 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
     return (
       <mesh ref={ref} position={[x * tileSize, geometry.parameters.height / 2, y * tileSize]} material={material.current} castShadow receiveShadow>
         <primitive object={geometry} attach="geometry" />
-        {/* {isSelected && (
-          <CSS2DObject>
-            <div className="label" style={{ marginTop: '-1em' }}>
-              {name}
-            </div>
-          </CSS2DObject>
-        )} */}
+        {selectedProduct && (
+          <Html center>
+            <MapProductLabel text={selectedProduct.product.name}/>
+          </Html>
+        )}
       </mesh>
     );
-  };
-
-  const updateCamera = () => {
-    if (controlsRef.current) {
-      const camera = controlsRef.current.object;
-      const offset = new THREE.Vector3(-6, 6, 0);
-      const targetPosition = personRef.current.position.clone().add(offset);
-      camera.position.lerp(targetPosition, 0.1);
-      camera.lookAt(personRef.current.position);
-    }
-  };
+  }
 
   const Floor = () => {
     return (
@@ -267,10 +158,12 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
   };
 
   function CameraControls({ personRef, cameraMode}: any) {
-    const compassHeading = useDeviceOrientation();
-    const lastHeading = useRef(compassHeading);
+    const [_, displacement] = useDeviceOrientation();
+    //const lastHeading = useRef(compassHeading);
     const lastTheta = useRef(0); // To store last frame's theta
-    const rotationalVelocity = useRef(0); // Rotational velocity
+    const cameraPositionRef = useRef(new THREE.Vector3(0, 10, -13)); // Default position
+    const cameraRotationRef = useRef(new THREE.Euler(0, 0, 0)); // Default rotation
+
 
     const { camera, gl: { domElement } } = useThree();
     const touchStart = useRef({ x: 0, y: 0 });
@@ -290,55 +183,39 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
     const rotationSensitivity = 0.005;  // Adjust this value to reduce sensitivity
     const zoomSensitivity = 0.02;     
 
-    const initialPositionSet = useRef(false);
-
     const maxPolarAngle = Math.PI / 2 - 0.1;
 
-    const setInitialCameraPosition = () => {
-      const offset = new THREE.Vector3(0, 2, -5); // Adjust as needed for your scene
-      camera.position.copy(personRef.current.position.clone().add(offset));
-      camera.lookAt(personRef.current.position);
-      initialPositionSet.current = true;
-    };
-
     const setTopDownView = () => {
-      // Adjust only the Y coordinate for the height, keep X and Z the same
       const topDownPosition = new THREE.Vector3(
-          camera.position.x, // Preserve current X
-          10, // Height from the top to adequately cover the area
-          camera.position.z  // Preserve current Z
+        personRef.current.position.x,
+        10, // height from the top to adequately cover the area
+        personRef.current.position.z
       );
-      camera.position.copy(topDownPosition);
-      camera.lookAt(personRef.current.position);
-      camera.up.set(0, 1, 0); // Set up vector to default for proper orientation
-  };
+      camera.position.copy(topDownPosition); // Use copy instead of lerp for immediate placement
+      camera.lookAt(new THREE.Vector3(personRef.current.position.x, personRef.current.position.y, personRef.current.position.z)); // Ensure the camera is looking straight down
+      camera.up.set(0, 0, -1); // Correct the camera's up vector to ensure correct orientation
+    };
   
     // This function adjusts camera position for tilted view
     const setTiltedView = () => {
-      // Calculate the new position maintaining the current horizontal angle
-      const offset = new THREE.Vector3(0, 10, -13); // Vertical offset for the tilted view
-      const direction = new THREE.Vector3().subVectors(camera.position, personRef.current.position).normalize();
-      const horizontalDistance = direction.multiplyScalar(13); // Assuming 13 is the distance from the player
-  
-      const tiltedPosition = new THREE.Vector3(
-          personRef.current.position.x + horizontalDistance.x,
-          personRef.current.position.y + offset.y, // Set height
-          personRef.current.position.z + horizontalDistance.z
-      );
-  
+      const offset = new THREE.Vector3(-10, 10, 0); // Offset for the tilted view
+      const tiltedPosition = personRef.current.position.clone().add(offset);
+      camera.rotateY(90 * (Math.PI / 180))
       camera.position.copy(tiltedPosition);
       camera.lookAt(personRef.current.position);
-      camera.up.set(0, 1, 0); // Ensure the up vector is correct
-  };
-
-    // useEffect(() => {
-    //   if (personRef.current && !initialPositionSet.current) {
-    //     setInitialCameraPosition();
-    //   }
-    // }, [personRef.current]); 
+      camera.up.set(0, 1, 0); // Reset the up vector to default
+    };
 
     useEffect(() => {
-      lastTheta.current = THREE.MathUtils.degToRad(compassHeading); // Initialize with the current heading in radians
+      if (personRef.current) {
+        personRef.current.position.x -= displacement.x;
+        personRef.current.position.z -= displacement.y; // Assuming y displacement affects z-axis in 3D space
+        personRef.current
+      }
+    }, [displacement])
+
+    useEffect(() => {
+      //lastTheta.current = THREE.MathUtils.degToRad(compassHeading); // Initialize with the current heading in radians
     }, []);
 
     useEffect(()=>{
@@ -495,107 +372,83 @@ const handleTouchEnd = () => {
 
     // Apply rotation and zoom based on velocity
     useFrame(({ camera }) => {
-      // if (Math.abs(rotationVelocity.theta) > 0.0001 || Math.abs(rotationVelocity.phi) > 0.0001) {
-      //     const offset = new THREE.Vector3().subVectors(camera.position, personRef.current.position);
-      //     const spherical = new THREE.Spherical().setFromVector3(offset);
-      //     spherical.theta += rotationVelocity.theta;
+      if (Math.abs(rotationVelocity.theta) > 0.0001 || Math.abs(rotationVelocity.phi) > 0.0001) {
+          const offset = new THREE.Vector3().subVectors(camera.position, personRef.current.position);
+          const spherical = new THREE.Spherical().setFromVector3(offset);
+          spherical.theta += rotationVelocity.theta;
   
-      //     // Calculate new phi ensuring it doesn't go below the minimum polar angle
-      //     const newPhi = spherical.phi + rotationVelocity.phi;
-      //     spherical.phi = Math.max(0, Math.min(maxPolarAngle, newPhi)); // Clamping phi within the desired range
+          // Calculate new phi ensuring it doesn't go below the minimum polar angle
+          const newPhi = spherical.phi + rotationVelocity.phi;
+          spherical.phi = Math.max(0, Math.min(maxPolarAngle, newPhi)); // Clamping phi within the desired range
   
-      //     spherical.makeSafe();
-      //     offset.setFromSpherical(spherical);
-      //     if(cameraMode === CAMERA_MODES.TILTED) {
-      //       camera.position.copy(personRef.current.position).add(offset);
-      //       camera.lookAt(personRef.current.position);
-      //     }
+          spherical.makeSafe();
+          offset.setFromSpherical(spherical);
+          if(cameraMode === CAMERA_MODES.TILTED) {
+            camera.position.copy(personRef.current.position).add(offset);
+            camera.lookAt(personRef.current.position);
+          }
   
-      //     // Apply damping to rotation velocity
-      //     setRotationVelocity(prev => ({
-      //         theta: prev.theta * (1 - rotateDamping),
-      //         phi: prev.phi * (1 - rotateDamping)
-      //     }));
-      // }
+          // Apply damping to rotation velocity
+          setRotationVelocity(prev => ({
+              theta: prev.theta * (1 - rotateDamping),
+              phi: prev.phi * (1 - rotateDamping)
+          }));
+      }
 
   
-      // // Handle zoom
-      // if (Math.abs(zoomVelocity - 1) > 0.001) {
-      //     camera.zoom *= zoomVelocity;
-      //     camera.updateProjectionMatrix();
-      //     setZoomVelocity(prev => prev + (1 - prev) * zoomDamping);
-      // }
+      // Handle zoom
+      if (Math.abs(zoomVelocity - 1) > 0.001) {
+          camera.zoom *= zoomVelocity;
+          camera.updateProjectionMatrix();
+          setZoomVelocity(prev => prev + (1 - prev) * zoomDamping);
+      }
 
       if (!personRef.current) {
         return;
     }
 
-    const currentThetaRad = THREE.MathUtils.degToRad(compassHeading) % (2 * Math.PI);
-        let lastThetaRad = lastTheta.current;
 
-        // Normalize lastTheta to ensure it's always within the same range as currentThetaRad
-        lastThetaRad = lastThetaRad % (2 * Math.PI);
+    // // Convert the compass heading from degrees to radians and normalize it
+    // const currentThetaRad = THREE.MathUtils.degToRad(compassHeading) % (2 * Math.PI);
+    // let lastThetaRad = lastTheta.current;
 
-        // Determine the shortest path difference
-        let deltaTheta = currentThetaRad - lastThetaRad;
-        if (deltaTheta > Math.PI) {
-            deltaTheta -= 2 * Math.PI; // Rotate counterclockwise
-        } else if (deltaTheta < -Math.PI) {
-            deltaTheta += 2 * Math.PI; // Rotate clockwise
-        }
+    // // Normalize lastTheta to ensure it's always within the same range as currentThetaRad
+    // lastThetaRad = lastThetaRad % (2 * Math.PI);
 
-        // Update the spherical coordinates of the camera
-        const offset = new THREE.Vector3().subVectors(camera.position, personRef.current.position);
-        const spherical = new THREE.Spherical().setFromVector3(offset);
-        spherical.theta += deltaTheta; // Apply the calculated delta directly
+    // // Determine the shortest path difference
+    // let deltaTheta = currentThetaRad - lastThetaRad;
+    // if (deltaTheta > Math.PI) {
+    //     deltaTheta -= 2 * Math.PI; // Rotate counterclockwise
+    // } else if (deltaTheta < -Math.PI) {
+    //     deltaTheta += 2 * Math.PI; // Rotate clockwise
+    // }
 
-        // Set the phi based on camera mode
-        if (cameraMode === 'TILTED') {
-            spherical.phi = Math.PI / 3;
-        } else if (cameraMode === 'TOP_DOWN') {
-            spherical.phi = Math.PI / 2;
-        }
-        spherical.radius = 10;
+    // // Update the spherical coordinates of the camera
+    // const offset = new THREE.Vector3().subVectors(camera.position, personRef.current.position);
+    // const spherical = new THREE.Spherical().setFromVector3(offset);
+    // spherical.theta += deltaTheta; // Apply the calculated delta directly
 
-        // Apply updates to camera position
-        offset.setFromSpherical(spherical);
-        camera.position.copy(personRef.current.position).add(offset);
-        camera.lookAt(personRef.current.position);
+    // // Set the phi based on camera mode
+    // if (cameraMode === 'TILTED') {
+    //     spherical.phi = Math.PI / 3;
+    // } else if (cameraMode === 'TOP_DOWN') {
+    //     spherical.phi = Math.PI / 2;
+    // }
+    // spherical.radius = 10;
 
-        // Update lastTheta for the next frame
-        lastTheta.current = spherical.theta;
+    // // Apply updates to camera position
+    // offset.setFromSpherical(spherical);
+    // camera.position.copy(personRef.current.position).add(offset);
+    // camera.lookAt(personRef.current.position);
+
+    // // Update lastTheta for the next frame
+    // lastTheta.current = spherical.theta;
   });
     
 
     return null;
 }
 
-  
-
-
-  // const movePerson = (dx, dy) => {
-  //   const direction = new THREE.Vector3();
-  //   controlsRef.current.object.getWorldDirection(direction);
-  //   direction.y = 0;
-  //   direction.normalize();
-
-  //   const right = new THREE.Vector3();
-  //   right.crossVectors(controlsRef.current.object.up, direction).normalize();
-
-  //   const moveDistance = 0.2;
-  //   const moveX = right.multiplyScalar(dx * moveDistance);
-  //   const moveZ = direction.multiplyScalar(dy * moveDistance);
-
-  //   new TWEEN.Tween(personRef.current.position)
-  //     .to({
-  //       x: personRef.current.position.x + moveX.x + moveZ.x,
-  //       y: personRef.current.position.y,
-  //       z: personRef.current.position.z + moveX.z + moveZ.z,
-  //     }, 200)
-  //     .easing(TWEEN.Easing.Quadratic.Out)
-  //     .onUpdate(updateCamera)
-  //     .start();
-  // };
 
   return (
     <>
@@ -614,9 +467,9 @@ const handleTouchEnd = () => {
           }
           return null;
         })}
-        {/* <BlockedArea blockedCenterX={blockedCenterX} blockedCenterY={blockedCenterY} blockedWidth={blockedWidth} blockedHeight={blockedHeight} /> */}
+        <BlockedArea blockedCenterX={blockedCenterX} blockedCenterY={blockedCenterY} blockedWidth={blockedWidth} blockedHeight={blockedHeight} /> 
 
-        <mesh ref={personRef} position={[centerX * tileSize, 0, centerY * tileSize]}>
+        <mesh ref={personRef} position={[0, 0, 6]}>
           <boxGeometry args={[tileSize, 2, tileSize]} />
           <meshBasicMaterial color={0xffffff} />
         </mesh>

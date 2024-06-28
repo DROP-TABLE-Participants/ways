@@ -9,7 +9,7 @@ function Login() {
         const username = formData.get('username') as string;
         const password = formData.get('password') as string;
 
-        fetch('https://ways-api.azurewebsites.net/api/admin/auth/login', {
+        fetch('https://ways-api.codingburgas.bg/api/admin/auth/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

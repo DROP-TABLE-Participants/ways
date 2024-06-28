@@ -1,0 +1,48 @@
+.label-container {
+    padding: 1.5rem;
+    .product-container {
+        background: #f86705;
+        width: 10px;
+        height: 10px;
+        overflow: hidden;
+        border-radius: 100%;
+        transform: translateY(-200%); /* Adjust this value based on the size of your tiles */
+        .product-label {
+            background: white;
+            border-radius: 9px;
+            opacity: .8;
+            font-size: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateY(50%);
+            
+    
+            -webkit-user-select: none; /* Safari */
+            -ms-user-select: none; /* IE 10 and IE 11 */
+            user-select: none; /* Standard syntax */
+            pointer-events: none;
+        }
+    }
+}
+
+
+.active {
+    
+    .product-container {
+        width: fit-content;
+        height: fit-content;
+        border-radius: none;
+        background: none;
+        overflow: visible;
+
+        .product-label {
+            opacity: 1;
+            box-sizing: border-box;
+            padding: 10px 15px;
+            transition: padding .1s;
+        }
+    }
+
+}
