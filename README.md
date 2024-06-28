@@ -73,6 +73,11 @@ npm install
 npm run dev
 </pre>
 
+
+<pre>
+Frontend is at localhost:CLIENT_PORT
+Backend is at localhost:SERVER_PORT
+</pre> 
 <hr>
 
 <h3><B>Website domain:</B></h3>
