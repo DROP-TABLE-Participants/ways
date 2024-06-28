@@ -23,7 +23,7 @@ async def get_path(items: List[str]):
 
     additional_paths = ["EN", "EX"]
     exits = ["CA1", "CA2", "CA3", "CA4", "S1", "S2", "S3", "S4"]
-    golden_eggs = ["P204", "P19", "P269", "P101", "P300"]
+    golden_eggs = ["P279", "P19", "P204", "P107", "P310"]
 
     for node1, node2 in itertools.combinations(items + additional_paths + exits + golden_eggs, 2):
         cached_path = redis_client.get(f"{node1}:{node2}")
