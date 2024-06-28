@@ -6,7 +6,6 @@ import { Html, Line } from '@react-three/drei';
 import useDeviceOrientation from '../hooks/DeviceOrientation';
 import { blockedAreaMaterial, PathShaderMaterial, PulsingMaterial, GradientMaterial, BlockedTileMaterial } from './mapScene/materials';
 import MapProductLabel from './mapProductLabel';
-import { Toaster, toast } from 'sonner';
 import ProximityProductPopup from './ProximirtyProductPopup';
 
 const tileSize = 1; // Global tile size variable
@@ -115,7 +114,7 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
           const dy = personRef.current.position.z - product.tile.y * tileSize; // Assuming Z is the up-down axis in your coordinate system
           const distance = Math.sqrt(dx * dx + dy * dy);
   
-          if (distance <= proximityThreshold) {
+          if (true) {
             closeProduct.current = product.product;
           }
         });
@@ -220,7 +219,8 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
     const [rotationVelocity, setRotationVelocity] = useState({ theta: 0, phi: 0 });
 
     const rotationSensitivity = 0.005;  // Adjust this value to reduce sensitivity
-    const zoomSensitivity = 0.02;     
+    const zoomSensitivity = 0.02;
+    const lastZoom = useRef(camera.position.y);
 
     const maxPolarAngle = Math.PI / 2 - 0.1;
 
@@ -289,10 +289,17 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
     };
 
     const handleWheel = (event: any) => {
-      event.preventDefault();
-      const delta = -event.deltaY * 0.005; // Normalize wheel to +1 or -1
-      const zoomFactor = Math.exp(delta * zoomSensitivity * 50);
-      setZoomVelocity(zoomFactor);
+      if (cameraMode === CAMERA_MODES.TOP_DOWN) {
+        event.preventDefault();
+        const zoomChange = event.deltaY * 0.1;
+        camera.position.y = Math.max(5, camera.position.y + zoomChange); // Clamp the zoom level
+      }
+      else {
+        event.preventDefault();
+        const delta = -event.deltaY * 0.005; // Normalize wheel to +1 or -1
+        const zoomFactor = Math.exp(delta * zoomSensitivity * 50);
+        setZoomVelocity(zoomFactor);
+      }
     };
 
     const getTouchDistance = (event: any) => {
@@ -309,6 +316,12 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
               touchStart.current = { x: event.touches[0].clientX, y: event.touches[0].clientY };
           }
       } else if (event.touches.length === 2) {
+        if(cameraMode == CAMERA_MODES.TOP_DOWN) {
+          const touch1 = new THREE.Vector2(event.touches[0].clientX, event.touches[0].clientY);
+          const touch2 = new THREE.Vector2(event.touches[1].clientX, event.touches[1].clientY);
+          touchStartDistance.current = touch1.distanceTo(touch2);
+        lastZoom.current = camera.position.z;
+        } else {
           const dx = event.touches[0].clientX - event.touches[1].clientX;
           const dy = event.touches[0].clientY - event.touches[1].clientY;
           touchStartDistance.current = Math.sqrt(dx * dx + dy * dy);
@@ -318,6 +331,7 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
               x: (event.touches[0].clientX + event.touches[1].clientX) / 2,
               y: (event.touches[0].clientY + event.touches[1].clientY) / 2
           };
+        }
       }
     };
 
@@ -349,6 +363,14 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
               const zoomFactor = distance / touchStartDistance.current;
               camera.zoom *= zoomFactor;
               camera.updateProjectionMatrix();
+      
+              if (touchStartDistance.current !== 0) {
+                const zoomFactor = touchStartDistance.current / distance;
+                camera.position.z = Math.max(5, lastZoom.current * zoomFactor);
+              }
+      
+              touchStartDistance.current = distance;
+              lastZoom.current = camera.position.y;
 
               const angleDelta = angle - touchStartAngle.current;
               camera.rotation.z += angleDelta;  // Rotate camera based on two-finger rotation
@@ -387,6 +409,7 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
 
 const handleTouchEnd = () => {
   isZooming.current = false; // Reset the zooming flag on finger lift
+  touchStartDistance.current = 0; // Reset on touch end
 };
 
     useEffect(() => {
@@ -505,7 +528,7 @@ const handleTouchEnd = () => {
         
         })}
         <HandleProductProximity/>
-        <ProximityProductPopup product={closeProduct} onProductCollect={()=>{alert('hello')}}/>
+        
         {/* <BlockedArea blockedCenterX={blockedCenterX} blockedCenterY={blockedCenterY} blockedWidth={blockedWidth} blockedHeight={blockedHeight} />  */}
 
         <mesh ref={personRef} position={[0, 0, 6]}>
@@ -519,7 +542,7 @@ const handleTouchEnd = () => {
       <button onClick={() => setCameraMode(CAMERA_MODES.TILTED)}>Отстрани</button>
       <button onClick={() => setCameraMode(CAMERA_MODES.TOP_DOWN)}>Отгоре</button>
       </div>
-      <Toaster richColors />
+      {closeProduct.current != null ? <ProximityProductPopup product={closeProduct} onProductCollect={()=>{selectedProducts = selectedProducts.filter((product)=>{return product.product !== closeProduct}); closeProduct.current = null}}/> : null}
     </>
   )
 };
