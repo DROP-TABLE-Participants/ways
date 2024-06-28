@@ -106,7 +106,7 @@ function Catalog() {
                                             imageUrl={object.imageUrl}
                                             key={i}
                                             quantity={quantities[i] || 1}
-                                            price={Math.floor(Math.random() * 29) + 1}
+                                            price={object.price}
                                             id={object.id}
                                             inCart={inCart[i]}
                                         />
