@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import * as THREE from 'three';
 import { Canvas, useFrame, useThree, extend } from '@react-three/fiber';
 import TWEEN from '@tweenjs/tween.js';
@@ -55,33 +55,28 @@ const calcDimensions = (tiles: Array<any>) => {
 // };
 
 // Extend the drei components to use this new material
-extend({ PathShaderMaterial });
 
-function Path({ points }: {points: any}) {
-  const shaderRef = useRef();
-  
+function Path({ points }) {
+  const materialRef = useRef();
+
   // Update shader uniforms
   useFrame(({ clock }) => {
-    if (shaderRef.current) {
-      shaderRef.current.uniforms.time.value = clock.getElapsedTime();
+    if (materialRef.current) {
+      materialRef.current.uniforms.time.value = clock.getElapsedTime();
     }
   });
 
-  if(points == null) return null;
+  if (!points || points.length === 0) return null;
 
-
-  let vertices: Array<THREE.Vector3> = [];
-  points.forEach((point: any)=>{
-    vertices.push(new THREE.Vector3(point[1], 0.1, point[0]))
-  })
-
+  // Convert the points to Vector3 objects
+  const vertices = points.map((point) => new THREE.Vector3(point[1], 0.1, point[0]));
 
   return (
     <Line
-      points={vertices} // Pass points directly
+      points={vertices} // Pass the points directly
       color="blue"
-      lineWidth={10} // Set the thickness of the line
-      material={shaderRef} // Use the custom shader
+      lineWidth={10}
+      material={materialRef} // Use the custom shader material
     />
   );
 }
@@ -200,8 +195,7 @@ function Map ({tiles, selectedProducts, path}: {tiles: Array<any>, selectedProdu
     //const lastHeading = useRef(compassHeading);
     const lastTheta = useRef(0); // To store last frame's theta
     const cameraPositionRef = useRef(new THREE.Vector3(0, 10, -13)); // Default position
-    const cameraRotationRef = useRef(new THREE.Euler(0, 0, 0)); // Default rotation
-
+    const cameraRotationRef = useRef(new THREE.Euler(0, 0, 0)); // Default rotation    
 
     const { camera, gl: { domElement } } = useThree();
     const touchStart = useRef({ x: 0, y: 0 });

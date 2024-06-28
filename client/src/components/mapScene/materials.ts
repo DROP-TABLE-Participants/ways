@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { shaderMaterial } from "@react-three/drei";
 import { tileSize } from './constants';
+import { extend } from '@react-three/fiber';
 
 export const GradientMaterial = shaderMaterial(
     {
@@ -80,8 +81,11 @@ export const blockedAreaMaterial = new THREE.ShaderMaterial({
     transparent: true
   });
 
-export  const PathShaderMaterial = shaderMaterial(
-    { time: 0, color: new THREE.Color(0x0000ff) },
+  export const PathShaderMaterial = shaderMaterial(
+    {
+      color: new THREE.Color(0x0000ff),
+      time: 0,
+    },
     `precision mediump float;
     varying vec2 vUv;
   
@@ -95,10 +99,13 @@ export  const PathShaderMaterial = shaderMaterial(
     varying vec2 vUv;
   
     void main() {
-      float stripe = sin(vUv.x * 10.0 + time * 2.0);
-      gl_FragColor = mix(vec4(color, 1.0), vec4(0.5, 0.7, 1.0, 1.0), stripe);
+      float phase = sin(vUv.x * 20.0 + time);
+      gl_FragColor = mix(vec4(color, 1.0), vec4(0.5, 0.7, 1.0, 1.0), phase);
     }`
   );
+  
+  // Register the shader material so it can be used within R3F
+  extend({ PathShaderMaterial });
 
   export const BlockedTileMaterial = shaderMaterial(
     // Uniforms (global variables that you can use in the shader)
