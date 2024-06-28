@@ -86,6 +86,15 @@ function CartPanel() {
     sheetState.open();
   }
 
+  const redirect = () => {
+    console.log(cartProducts.length)
+    if (cartProducts.length > 8) return;
+
+    givePermissions();
+    sheetState.close();
+    navigate('/navigation');
+  }
+
   useEffect(() => {
     fetchCartProducts();
     fetchBusyHours();
@@ -156,10 +165,7 @@ function CartPanel() {
               </div>
             </div>
             <div className="cart-call-to-action" onClick={() => {
-             givePermissions();
-              sheetState.close();
-              navigate('/navigation');
-            }}>
+            redirect()}}>
               <p>Започни Пазаруване</p>
             </div>
           </div>

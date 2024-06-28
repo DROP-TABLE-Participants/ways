@@ -9,8 +9,7 @@ function ProximityProductPopup({product, onProductCollect} : {product: any, onPr
  
     return (
     <div className="product-popup-container">
-        <h1>{product.name}</h1>
-        <div onClick={onProductCollect}>Collect</div>
+        
     </div>
     )}
 
